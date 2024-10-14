@@ -1,0 +1,19 @@
+
+
+.inicial-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Ocupa toda la altura de la ventana */
+  }
+  
+  .logo {
+    width: 150px; /* Ajusta el tamaño según tu logo */
+    margin-bottom: 40px;
+  }
+  
+  button {
+    margin: 10px 0; /* Espaciado entre los botones */
+  }
+  
