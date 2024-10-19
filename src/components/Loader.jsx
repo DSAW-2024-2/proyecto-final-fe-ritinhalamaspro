@@ -1,6 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 
+import colors from './colors';
+
+
 const Loader = () => {
   return (
     <StyledWrapper>
@@ -152,7 +155,7 @@ const StyledWrapper = styled.div`
 
 @keyframes spinner-fade9234 {
   0% {
-    background-color: #69717d;
+    background-color: ${colors.primary};
   }
 
   100% {

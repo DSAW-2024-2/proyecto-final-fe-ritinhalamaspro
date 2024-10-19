@@ -2,16 +2,17 @@ import React from 'react';
 import Card from '../components/Card';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
-import { Link } from 'react-router-dom'; // Importamos Link para la navegación
-import Title from '../components/Title'; // Importamos el componente Title
-import Text from '../components/Text'; // Importamos el componente Text
+import { Link } from 'react-router-dom';
+import Title from '../components/Title';
+import Text from '../components/Text';
+import colors from '../components/colors'; // Importamos el archivo de colores
 
 const Register = () => {
   const linkStyle = {
-    color: '#D130FE',
-    textDecoration: 'underline', // Subrayado por defecto
-    cursor: 'pointer',           // Cambiar el cursor cuando esté encima del link
-    boxShadow: '0px 11px 5px rgba(0, 0, 0, 0.2)' 
+    color: colors.third, // Usamos la variable de color para el enlace
+    textDecoration: 'underline',
+    cursor: 'pointer',
+    boxShadow: '0px 11px 5px rgba(0, 0, 0, 0.2)',
   };
 
   return (
@@ -19,14 +20,18 @@ const Register = () => {
       <Card>
         <Title>Regístrate</Title>
         <form>
-          <InputField type="text" placeholder="Nombre Completo" />
+          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', gap: '7px' }}>
+            <InputField type="text" placeholder="Nombre" />
+            <InputField type="text" placeholder="Apellidos" />
+          </div>
+
           <InputField type="text" placeholder="ID de la Universidad" />
           <InputField type="email" placeholder="Correo Electrónico" />
           <InputField type="tel" placeholder="Teléfono" />
           <InputField type="password" placeholder="Contraseña" />
+          
           <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-          <Button to="/agrega-tu-foto" label="Registrarse" primary />
-          {/* /**A Donde???? */ }
+            <Button to="/agrega-tu-foto" label="Registrarse" primary />
           </div>
         </form>
         <Text>

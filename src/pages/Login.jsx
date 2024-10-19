@@ -5,45 +5,51 @@ import Button from '../components/Button';
 import Title from '../components/Title';
 import Text from '../components/Text';
 import { Link } from 'react-router-dom';
+import colors from '../components/colors'; // Importamos el archivo de colores
 
 const Login = () => {
   const headingStyle = {
     textAlign: 'center',
-    marginBottom: '80px', 
+    marginBottom: '80px',
     fontSize: '24px',
-    color: 'white',
+    color: colors.white, // Usamos la variable de color para el encabezado
   };
 
-
   const linkStyle = {
-    color: '#D130FE',
-    textDecoration: 'underline', 
-    cursor: 'pointer',   
-    boxShadow: '0px 11px 5px rgba(0, 0, 0, 0.2)'         
+    color: colors.third, // Usamos la variable de color para el enlace
+    textDecoration: 'underline',
+    cursor: 'pointer',
   };
 
   const formStyle = {
     display: 'flex',
-    flexDirection: 'column', 
+    flexDirection: 'column',
     alignItems: 'center',
   };
-
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
       <Card>
-        <Title style={headingStyle}>Inicia Sesión</Title> 
-        <form style={{formStyle}}>
-          <InputField type="email" placeholder="Correo electrónico" />
-          <InputField type="password" placeholder="Contraseña" />
+        <Title style={headingStyle}>Inicia Sesión</Title>
+        <form style={formStyle}>
+          <InputField
+            type="email"
+            placeholder="Correo electrónico"
+            required
+          />
+          <InputField
+            type="password"
+            placeholder="Contraseña"
+            required
+          />
           <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-            <Button label="Iniciar Sesión" primary />
+            <Button to="/pagina-principal" label="Iniciar Sesión" primary />
           </div>
         </form>
-        <Text>
+        <Text style={{ marginTop: '20px', color: colors.white }}> {/* Usamos la variable de color para el texto */}
           ¿No tienes una cuenta? 
           <br />
-          <Link to="/registrarse" style={linkStyle}>Registrate</Link>
+          <Link to="/registrarse" style={linkStyle}>Regístrate</Link>
         </Text>
       </Card>
     </div>

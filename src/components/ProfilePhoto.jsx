@@ -1,26 +1,42 @@
-const ProfilePhoto = ({ imageUrl, size = '150px' }) => {
+// ProfilePhoto.jsx
+import React from 'react';
+import colors from './colors'; // Importamos los colores
+import AddButton from './AddButton'; // Asegúrate de que el AddButton esté bien importado
+
+const ProfilePhoto = ({ imageUrl, size = '150px', borderColor = colors.white, boxShadowColor = 'rgba(0, 0, 0, 0.3)' }) => {
   const circleStyle = {
     width: size,
     height: size,
-    borderRadius: '50%',         // Makes the div circular
-    overflow: 'hidden',          // Ensures the image doesn't overflow the circle
+    borderRadius: '50%',         // Hace el div circular
+    overflow: 'hidden',          // Evita que la imagen se desborde del círculo
     display: 'flex',
-    justifyContent: 'center',   // Centers the image horizontally
-    alignItems: 'center',       // Centers the image vertically
-    border: '2px solid #fff',   // Optional: adds a white border around the circle
-    boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.3)',  // Adds subtle shadow
-    margin: '80px 0',            // Adds top and bottom margin
+    justifyContent: 'center',    // Centra la imagen horizontalmente
+    alignItems: 'center',        // Centra la imagen verticalmente
+    border: `2px solid ${borderColor}`,   // Borde ajustable con color dinámico
+    boxShadow: `0px 0px 15px ${colors.primary}`,  // Sombra con el color primario
+    margin: '80px 0',            // Margen superior e inferior
+    position: 'relative',        // Para posicionar el botón en la parte inferior derecha
   };
 
   const imageStyle = {
-    width: '100%',   // Makes sure the image fills the circle
-    height: '100%',  // Makes sure the image fills the circle
-    objectFit: 'cover',  // Ensures the image scales correctly without distorting
+    width: '100%',   // Asegura que la imagen llene el círculo
+    height: '100%',  // Asegura que la imagen llene el círculo
+    objectFit: 'cover',  // Asegura que la imagen se escala correctamente sin distorsionar
   };
 
   return (
     <div style={circleStyle}>
       <img src={imageUrl} alt="Profile" style={imageStyle} />
+
+      {/* Botón en la parte inferior derecha */}
+      <div style={{
+        position: 'absolute',
+        bottom: '10px',   // Ajustamos para que el botón no esté pegado al borde
+        right: '10px',
+        zIndex: '20',     // Asegura que el botón esté por encima de la imagen
+      }}>
+        <AddButton />
+      </div>
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import React from 'react';
+import color from './colors';
 
 const InputField = ({ type, placeholder }) => {
   const inputStyle = {
@@ -8,13 +9,11 @@ const InputField = ({ type, placeholder }) => {
     border: '1px solid #898A8D',
     borderRadius: '13px',
     backgroundColor: 'transparent',
-    color: '#898A8D',
+    color: color.details,
     border: '1px solid #898A8D'
   };
 
-  const placeholderStyle = {
-    color: '#7f7f7f',
-  };
+
 
   return (
     <input

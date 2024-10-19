@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import colors from './colors';
 
 const AddButton = () => {
   const [isHovered, setIsHovered] = useState(false);
@@ -7,14 +8,16 @@ const AddButton = () => {
     width: '40px',
     height: '40px',
     borderRadius: '50%',
-    backgroundColor: isHovered ? '#3B3BFF' : '#4B4BFF', 
-    color: '#fff',
+    backgroundColor: isHovered ? colors.third : colors.primary, 
+    color: colors.white, 
     fontSize: '24px',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    border: '3px solid #898A8D',
-    boxShadow: isHovered ? '0px 6px 12px rgba(0, 0, 0, 0.3)' : '0px 4px 8px rgba(0, 0, 0, 0.2)', 
+    border: `3px solid ${colors.details}`, 
+    boxShadow: isHovered 
+      ? `0px 6px 12px rgba(0, 0, 0, 0.3)` 
+      : `0px 4px 8px rgba(0, 0, 0, 0.2)`,
     position: 'absolute',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
@@ -32,3 +35,4 @@ const AddButton = () => {
 };
 
 export default AddButton;
+
