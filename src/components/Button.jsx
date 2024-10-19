@@ -17,25 +17,27 @@ const StyledButton = styled.button`
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease;
   box-shadow: ${(props) => (props.isHovered ? '0px 11px 5px rgba(0, 0, 0, 0.7)' : '0px 2px 10px rgba(0, 0, 0, 0.247)')};
-  
-  &:hover {
-    /* Opcional: estilos adicionales al pasar el mouse */
-  }
 `;
 
-const Button = ({ to, label, primary, onClick, ...rest }) => { 
+const Button = ({ to, label, primary = false, onClick, fullWidth = false, ...rest }) => { 
   const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => setIsHovered(false);
+
+  const buttonProps = {
+    primary,
+    isHovered,
+    onMouseEnter: handleMouseEnter,
+    onMouseLeave: handleMouseLeave,
+    fullWidth,
+    ...rest,
+  };
 
   if (to) {
     return (
       <Link to={to} style={{ textDecoration: 'none' }}>
-        <StyledButton
-          primary={primary}
-          isHovered={isHovered}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          {...rest}
-        >
+        <StyledButton {...buttonProps}>
           {label}
         </StyledButton>
       </Link>
@@ -43,14 +45,7 @@ const Button = ({ to, label, primary, onClick, ...rest }) => {
   }
 
   return (
-    <StyledButton
-      primary={primary}
-      isHovered={isHovered}
-      onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      {...rest}
-    >
+    <StyledButton {...buttonProps} onClick={onClick}>
       {label}
     </StyledButton>
   );

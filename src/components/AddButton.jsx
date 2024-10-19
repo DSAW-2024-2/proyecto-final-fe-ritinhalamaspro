@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import colors from './colors';
 
 const AddButton = () => {
   const [isHovered, setIsHovered] = useState(false);
+  const fileInputRef = useRef(null);
 
   const buttonStyle = {
     width: '40px',
@@ -23,16 +24,38 @@ const AddButton = () => {
     transition: 'all 0.3s ease',
   };
 
+  const handleButtonClick = () => {
+    // Abre el explorador de archivos solo si no está en proceso
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      console.log('Archivo seleccionado:', file.name);
+    }
+  };
+
   return (
-    <div
-      style={buttonStyle}
-      onMouseEnter={() => setIsHovered(true)} 
-      onMouseLeave={() => setIsHovered(false)} 
-    >
-      +
-    </div>
+    <>
+      <div
+        style={buttonStyle}
+        onMouseEnter={() => setIsHovered(true)} 
+        onMouseLeave={() => setIsHovered(false)} 
+        onClick={handleButtonClick}
+      >
+        +
+      </div>
+
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: 'none' }} // El input sigue oculto
+        onChange={handleFileChange}
+        accept="image/*"
+      />
+    </>
   );
 };
 
 export default AddButton;
-
