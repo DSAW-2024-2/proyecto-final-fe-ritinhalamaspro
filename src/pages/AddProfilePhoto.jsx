@@ -9,34 +9,33 @@ import AddButton from '../components/AddButton';
 import colors from '../components/colors';
 
 const AddProfilePhoto = () => {
-  // Estado para almacenar la imagen seleccionada
   const [selectedImage, setSelectedImage] = useState("src/assets/PofilePhoto.png");
 
-  // Función para manejar la selección de imagen
+
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
-      setSelectedImage(imageUrl);  // Actualizar el estado con la nueva imagen
+      setSelectedImage(imageUrl);  
     }
   };
 
   const profileContainerStyle = {
     position: 'relative',
     display: 'flex',
-    flexDirection: 'column', // Alinear de forma vertical
+    flexDirection: 'column', 
     justifyContent: 'center',
-    alignItems: 'center',    // Centrar horizontalmente
+    alignItems: 'center',    
     width: '100%',
     marginBottom: '20px',
   };
 
-  // Contenedor para el AddButton
+  
   const addButtonContainerStyle = {
-    position: 'absolute',  // Posición absoluta dentro del contenedor
-    top: '210px',          // Ajustar la distancia desde la parte superior del contenedor
-    left: '60%',           // Centrar horizontalmente
-    transform: 'translateX(-50%)', // Ajuste de posición horizontal
+    position: 'absolute',  
+    top: '210px',          
+    left: '60%',           
+    transform: 'translateX(-50%)',
   };
 
   return (
@@ -46,10 +45,10 @@ const AddProfilePhoto = () => {
         <form>
           <div style={profileContainerStyle}>
             <ProfilePhoto
-              imageUrl={selectedImage}  // Usar la imagen seleccionada
+              imageUrl={selectedImage} 
               size="170px"
             />
-            {/* Contenedor centrado para el AddButton */}
+
             <div style={addButtonContainerStyle}>
               <label htmlFor="imageUpload" style={{ cursor: 'pointer' }}>
                 <AddButton />
@@ -57,9 +56,9 @@ const AddProfilePhoto = () => {
               <input
                 type="file"
                 id="imageUpload"
-                style={{ display: 'none' }} // Ocultar el input
-                onChange={handleImageUpload} // Manejar el evento de selección
-                accept="image/*"  // Aceptar solo imágenes
+                style={{ display: 'none' }} 
+                onChange={handleImageUpload} 
+                accept="image/*"  
               />
             </div>
           </div>

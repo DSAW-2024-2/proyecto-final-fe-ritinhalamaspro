@@ -5,13 +5,13 @@ import { Link } from 'react-router-dom';
 import Title from '../components/Title';
 import Text from '../components/Text';
 import AddPhoto from '../components/AddPhoto';
-import colors from '../components/colors'; // Importamos el archivo de colores
+import colors from '../components/colors';
 
 const AddSoatPhoto = () => {
   const linkStyle = {
-    color: colors.third, // Usamos la variable de color para el enlace
-    textDecoration: 'underline', // Subrayado por defecto
-    cursor: 'pointer',           // Cambia el cursor cuando está encima del link
+    color: colors.third,
+    textDecoration: 'underline', 
+    cursor: 'pointer',           
     boxShadow: '0px 11px 5px rgba(0, 0, 0, 0.2)' 
   };
 

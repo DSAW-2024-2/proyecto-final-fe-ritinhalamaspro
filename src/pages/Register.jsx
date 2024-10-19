@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
 import Title from '../components/Title';
 import Text from '../components/Text';
 import { Link, useNavigate } from 'react-router-dom';
-import colors from '../components/colors'; // Importamos el archivo de colores
+import colors from '../components/colors';
 import axios from 'axios';
-import Loader from '../components/Loader'; // Importa el componente Loader
+import Loader from '../components/Loader';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -16,85 +19,142 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false); // Estado de carga
 
-  const navigate = useNavigate(); // Usa useNavigate para redirigir
+  const [nameError, setNameError] = useState('');
+  const [surNameError, setSurNameError] = useState('');
+  const [universityIdError, setUniversityIdError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [phoneNumberError, setPhoneNumberError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true); // Estado para habilitar/deshabilitar el botón
+  const navigate = useNavigate();
+
+  // Función para validar los campos
+  const validateFields = () => {
+    let isValid = true;
+
+    // Validar nombre (solo letras)
+    const nameRegex = /^[a-zA-Z]+$/;
+    if (!name) {
+      setNameError('El nombre es requerido.');
+      isValid = false;
+    } else if (!nameRegex.test(name)) {
+      setNameError('El nombre debe contener solo letras.');
+      isValid = false;
+    } else {
+      setNameError('');
+    }
+
+    // Validar apellidos (solo letras)
+    if (!surName) {
+      setSurNameError('Los apellidos son requeridos.');
+      isValid = false;
+    } else if (!nameRegex.test(surName)) {
+      setSurNameError('Los apellidos deben contener solo letras.');
+      isValid = false;
+    } else {
+      setSurNameError('');
+    }
+
+    // Validar ID de la Universidad (exactamente 10 números)
+    const universityIdRegex = /^[0-9]{10}$/;
+    if (!universityId) {
+      setUniversityIdError('El ID de la Universidad es requerido.');
+      isValid = false;
+    } else if (!universityIdRegex.test(universityId)) {
+      setUniversityIdError('El ID de la Universidad debe contener exactamente 10 números.');
+      isValid = false;
+    } else {
+      setUniversityIdError('');
+    }
+
+    // Validar email
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!email) {
+      setEmailError('El correo electrónico es requerido.');
+      isValid = false;
+    } else if (!emailRegex.test(email)) {
+      setEmailError('Por favor, ingresa un correo electrónico válido.');
+      isValid = false;
+    } else {
+      setEmailError('');
+    }
+
+    // Validar teléfono
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneNumber) {
+      setPhoneNumberError('El número de teléfono es requerido.');
+      isValid = false;
+    } else if (!phoneRegex.test(phoneNumber)) {
+      setPhoneNumberError('El número de teléfono no es válido.');
+      isValid = false;
+    } else {
+      setPhoneNumberError('');
+    }
+
+    // Validar contraseña
+    if (!password) {
+      setPasswordError('La contraseña es requerida.');
+      isValid = false;
+    } else if (password.length < 8) {
+      setPasswordError('La contraseña debe tener al menos 8 caracteres.');
+      isValid = false;
+    } else {
+      setPasswordError('');
+    }
+
+    return isValid;
+  };
+
+  // Validar si todos los campos están llenos para habilitar el botón
+  useEffect(() => {
+    if (
+      name &&
+      surName &&
+      universityId &&
+      email &&
+      phoneNumber &&
+      password
+    ) {
+      setIsButtonDisabled(false); // Habilitar el botón si todos los campos están completos
+    } else {
+      setIsButtonDisabled(true); // Deshabilitar el botón si falta algún campo
+    }
+  }, [name, surName, universityId, email, phoneNumber, password]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Activar el loader cuando el formulario se envía
+    setLoading(true);
 
-    // Validación de los campos
-    if (!name || !surName || !universityId || !email || !phoneNumber || !password) {
-      setError('Por favor, completa todos los campos.');
-      setLoading(false); // Desactivar el loader
-      return;
-    }
-
-    // Validación de email
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(email)) {
-      setError('Por favor, ingresa un correo electrónico válido.');
+    if (!validateFields()) {
       setLoading(false);
       return;
     }
-
-    // Validación de contraseña (mínimo 8 caracteres)
-    if (password.length < 8) {
-      setError('La contraseña debe tener al menos 8 caracteres.');
-      setLoading(false);
-      return;
-    }
-
-    // Validación de teléfono (solo números)
-    const phoneRegex = /^[0-9]{10}$/; // Ajusta según el formato del teléfono que esperas
-    if (!phoneRegex.test(phoneNumber)) {
-      setError('El número de teléfono no es válido.');
-      setLoading(false);
-      return;
-    }
-
-    // Imprimir los datos que se van a enviar en la solicitud
-    console.log('Datos enviados:', {
-      name,
-      surName,
-      universityId,
-      email,
-      phoneNumber,
-      password
-    });
 
     try {
-      // Realizar la solicitud POST a la API
       const response = await axios.post('https://proyecto-final-be-ritinhalamaspro.vercel.app/register', {
         name,
         surName,
-        universityId,
+        universityID: universityId,
         email,
         phoneNumber,
         password,
       });
 
-      // Si el registro fue exitoso, redirigir al usuario
       if (response.status === 201) {
         console.log('Usuario registrado correctamente');
-        navigate('/agrega-tu-foto'); // Redirige al usuario usando navigate
+        navigate('/agrega-tu-foto');
       }
     } catch (error) {
       console.error(error);
       const errorMessage = error.response?.data?.message || 'Hubo un error al registrar el usuario. Intenta nuevamente.';
-      setError(errorMessage);
+      alert(errorMessage);
     } finally {
-      setLoading(false); // Desactivar el loader después de la solicitud
+      setLoading(false);
     }
-  };
-
-  const linkStyle = {
-    color: colors.third, // Usamos la variable de color para el enlace
-    textDecoration: 'underline',
-    cursor: 'pointer',
-    boxShadow: '0px 11px 5px rgba(0, 0, 0, 0.2)',
   };
 
   return (
@@ -106,8 +166,8 @@ const Register = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo negro semi-transparente
-          zIndex: 999, // Asegura que el loader esté por encima de todo
+          backgroundColor: 'rgba(0, 0, 0, 0.633)', 
+          zIndex: 999, 
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -117,57 +177,96 @@ const Register = () => {
       )}
       <Card>
         <Title>Regístrate</Title>
-        {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
-        
         <form onSubmit={handleSubmit}>
           <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', gap: '7px' }}>
-            <InputField 
-              type="text" 
-              placeholder="Nombre" 
-              value={name} 
-              onChange={(e) => setName(e.target.value)} 
-            />
-            <InputField 
-              type="text" 
-              placeholder="Apellidos" 
-              value={surName} 
-              onChange={(e) => setSurName(e.target.value)} 
-            />
+            <div>
+              <InputField 
+                type="text" 
+                placeholder="Nombre" 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+              />
+              {nameError && <small style={{ color: colors.third }}>{nameError}</small>}
+            </div>
+            <div>
+              <InputField 
+                type="text" 
+                placeholder="Apellidos" 
+                value={surName} 
+                onChange={(e) => setSurName(e.target.value)} 
+              />
+              {surNameError && <small style={{ color: colors.third}}>{surNameError}</small>}
+            </div>
           </div>
 
-          <InputField 
-            type="text" 
-            placeholder="ID de la Universidad" 
-            value={universityId} 
-            onChange={(e) => setUniversityId(e.target.value)} 
-          />
-          <InputField 
-            type="email" 
-            placeholder="Correo Electrónico" 
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)} 
-          />
-          <InputField 
-            type="tel" 
-            placeholder="Teléfono" 
-            value={phoneNumber} 
-            onChange={(e) => setPhoneNumber(e.target.value)} 
-          />
-          <InputField 
-            type="password" 
-            placeholder="Contraseña" 
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
-          />
+          <div>
+            <InputField 
+              type="text" 
+              placeholder="ID de la Universidad" 
+              value={universityId} 
+              onChange={(e) => setUniversityId(e.target.value)} 
+            />
+            {universityIdError && <small style={{ color: colors.third }}>{universityIdError}</small>}
+          </div>
+
+          <div>
+            <InputField 
+              type="email" 
+              placeholder="Correo Electrónico" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+            />
+            {emailError && <small style={{ color: colors.third }}>{emailError}</small>}
+          </div>
+
+          <div>
+            <InputField 
+              type="tel" 
+              placeholder="Teléfono" 
+              value={phoneNumber} 
+              onChange={(e) => setPhoneNumber(e.target.value)} 
+            />
+            {phoneNumberError && <small style={{ color: colors.third}}>{phoneNumberError}</small>}
+          </div>
+
+          <div style={{ position: 'relative', width: '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+        <InputField 
+          type={showPassword ? 'text' : 'password'} 
+          placeholder="Contraseña" 
+          value={password} 
+          onChange={(e) => setPassword(e.target.value)} 
+          style={{ flex: 1 }} // Asegura que el campo ocupe todo el espacio disponible
+        />
+        
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            position: 'absolute',
+            right: '10px', // Alinea el icono a la derecha dentro del input
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 1, // Asegura que el ícono se sobreponga al input
+          }}
+        >
+          <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} size="lg" />
+        </button>
+      </div>
+      {passwordError && <small style={{ color: colors.third }}>{passwordError}</small>}
+    </div>
           
           <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-            <Button type="submit" label="Registrarse" primary />
+            <Button type="submit" label="Registrarse" primary disabled={isButtonDisabled} />
           </div>
         </form>
 
         <Text>
           ¿Ya tienes una cuenta?  
-          <Link to="/iniciar-sesion" style={linkStyle}> Iniciar Sesión</Link>
+          <Link to="/iniciar-sesion" style={{ color: colors.third, textDecoration: 'none' }}>Inicia sesión</Link>
         </Text>
       </Card>
     </div>

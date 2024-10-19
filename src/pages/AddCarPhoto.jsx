@@ -6,14 +6,14 @@ import { Link } from 'react-router-dom';
 import Title from '../components/Title';
 import Text from '../components/Text';
 import AddPhoto from '../components/AddPhoto';
-import colors from '../components/colors'; // Importamos el archivo de colores
+import colors from '../components/colors'; 
 
 const AddCarPhoto = () => {
   const linkStyle = {
-    color: colors.third,           // Usamos el color definido en colors.js
-    textDecoration: 'underline',   // Subrayado por defecto
-    cursor: 'pointer',             // Cambia el cursor cuando esté encima del link
-    boxShadow: '0px 11px 5px rgba(0, 0, 0, 0.2)', // Añade sombra para un efecto sutil
+    color: colors.third,           
+    textDecoration: 'underline',   
+    cursor: 'pointer',             
+    boxShadow: '0px 11px 5px rgba(0, 0, 0, 0.2)', 
   };
 
   return (

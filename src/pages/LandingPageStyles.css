@@ -5,15 +5,15 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh; /* Ocupa toda la altura de la ventana */
+    height: 100vh; 
   }
   
   .logo {
-    width: 150px; /* Ajusta el tamaño según tu logo */
+    width: 150px; 
     margin-bottom: 40px;
   }
   
   button {
-    margin: 10px 0; /* Espaciado entre los botones */
+    margin: 10px 0; 
   }
   

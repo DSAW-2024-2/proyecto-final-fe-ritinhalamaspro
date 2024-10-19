@@ -2,16 +2,14 @@ import React from 'react';
 import Card from '../components/Card';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
-import { Link } from 'react-router-dom'; // Importamos Link para la navegación
-import Title from '../components/Title'; // Importamos el componente Title
-import Text from '../components/Text'; // Importamos el componente Text
-import colors from '../components/colors'; // Importamos el archivo de colores
-
+import Title from '../components/Title'; 
+import Text from '../components/Text';
+import colors from '../components/colors';
 const RegisterCar = () => {
   const linkStyle = {
-    color: colors.third, // Usamos la variable de color para el enlace
-    textDecoration: 'underline', // Subrayado por defecto
-    cursor: 'pointer',           // Cambiar el cursor cuando esté encima del link
+    color: colors.third,
+    textDecoration: 'underline',
+    cursor: 'pointer',           
     boxShadow: '0px 11px 5px rgba(0, 0, 0, 0.2)',
   };
 
