@@ -1,17 +1,33 @@
-
 import React from 'react';
-
+import styled from 'styled-components';
 import Button from '../components/Button';
 import logo from '../assets/logo.png';
-import './LandingPageStyles.css'; 
+
+// Componente estilizado
+const InicialContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh; 
+`;
+
+const Logo = styled.img`
+  width: 150px; 
+  margin-bottom: 40px;
+`;
+
+const StyledButton = styled(Button)`
+  margin: 10px 0; 
+`;
 
 const LandingPage = () => {
   return (
-    <div className="inicial-container">
-      <img src={logo} alt="Logo" className="logo" />
-      <Button to="/iniciar-sesion" label="Iniciar Sesión" primary />
-      <Button to="/registrarse" label="Registrarse" />
-    </div>
+    <InicialContainer>
+      <Logo src={logo} alt="Logo" />
+      <StyledButton to="/iniciar-sesion" label="Iniciar Sesión" primary />
+      <StyledButton to="/registrarse" label="Registrarse" />
+    </InicialContainer>
   );
 };
 

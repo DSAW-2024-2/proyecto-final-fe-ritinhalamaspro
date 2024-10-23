@@ -75,6 +75,8 @@ const Login = () => {
 
       if (response.status === 200) {
         console.log('Usuario autenticado correctamente');
+        // Guardar el token en el localStorage
+        localStorage.setItem('token', response.data.token);
         navigate('/pagina-principal');
       } else {
         // Si las credenciales son incorrectas, mostramos el modal
