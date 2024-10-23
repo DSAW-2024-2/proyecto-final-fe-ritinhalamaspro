@@ -12,6 +12,9 @@ import MainPage from './pages/MainPage.jsx';
 import Loader from './components/Loader.jsx';
 import Switch from './components/Switch.jsx'; // Importa el componente Switch
 
+
+import RegisterUser from './pages/RegisterUser.jsx';
+
 const App = () => {
   return (
     <Router>
@@ -28,6 +31,8 @@ const App = () => {
           <Route path="/agrega-foto-carro" element={<AddCarPhoto />} />
           <Route path="/agrega-foto-soat" element={<AddSoatPhoto />} />
           <Route path="/pagina-principal" element={<MainPage />} />
+
+
         </Routes>
       </div>
     </Router>

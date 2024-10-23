@@ -27,7 +27,7 @@ const Role = () => {
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
-      {/* Asegurarse de que el Card tenga posición relativa */}
+
       <Card style={{ position: 'relative' }}>
         <Title>¡Quiero tener el rol de <span style={{ color: '#D130FE' }}><strong>Conductor</strong></span>!</Title>
 
@@ -68,7 +68,6 @@ const Role = () => {
           </StyledWrapper>
         </div>
 
-        {/* Mostrar el icono si es necesario */}
         <StyledIcon src={driverIcon} alt="Driver Icon" />
       </Card>
 
@@ -79,7 +78,6 @@ const Role = () => {
   );
 };
 
-// Estilo para el icono y otros elementos
 const StyledWrapper = styled.div`
   .radio-buttons-container {
     display: flex;
@@ -142,9 +140,8 @@ const StyledWrapper = styled.div`
   }
 `;
 
-// Estilos para el icono
 const StyledIcon = styled.img`
-  width: 70px;  // Tamaño ajustable
+  width: 70px;  
   margin-top: 20px;
   transition: transform 0.3s ease-in-out;
   

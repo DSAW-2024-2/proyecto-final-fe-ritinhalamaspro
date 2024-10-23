@@ -85,10 +85,7 @@ const Register = () => {
 
     // Validar teléfono
     const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneNumber) {
-      setPhoneNumberError('El número de teléfono es requerido.');
-      isValid = false;
-    } else if (!phoneRegex.test(phoneNumber)) {
+    if (!phoneRegex.test(phoneNumber)) {
       setPhoneNumberError('El número de teléfono no es válido.');
       isValid = false;
     } else {
@@ -116,12 +113,11 @@ const Register = () => {
       surName &&
       universityId &&
       email &&
-      phoneNumber &&
       password
     ) {
-      setIsButtonDisabled(false); // Habilitar el botón si todos los campos están completos
+      setIsButtonDisabled(false);
     } else {
-      setIsButtonDisabled(true); // Deshabilitar el botón si falta algún campo
+      setIsButtonDisabled(true); 
     }
   }, [name, surName, universityId, email, phoneNumber, password]);
 
@@ -236,7 +232,7 @@ const Register = () => {
           placeholder="Contraseña" 
           value={password} 
           onChange={(e) => setPassword(e.target.value)} 
-          style={{ flex: 1 }} // Asegura que el campo ocupe todo el espacio disponible
+          style={{ flex: 1 }} 
         />
         
         <button
@@ -247,10 +243,10 @@ const Register = () => {
             border: 'none',
             cursor: 'pointer',
             position: 'absolute',
-            right: '10px', // Alinea el icono a la derecha dentro del input
+            right: '10px',
             top: '50%',
             transform: 'translateY(-50%)',
-            zIndex: 1, // Asegura que el ícono se sobreponga al input
+            zIndex: 1, 
           }}
         >
           <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} size="lg" />
