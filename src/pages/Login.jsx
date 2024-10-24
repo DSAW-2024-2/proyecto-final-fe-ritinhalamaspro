@@ -146,6 +146,7 @@ const Login = () => {
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
+                color: 'white'
               }}
             >
               <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} /> {/* Ícono de ojo */}

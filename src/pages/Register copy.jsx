@@ -1,5 +1,4 @@
-// Register.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
@@ -11,7 +10,6 @@ import axios from 'axios';
 import Loader from '../components/Loader';
 import ProfilePhoto from '../components/ProfilePhoto';
 import AddButton from '../components/AddButton';
-import FeedbackModal from '../components/FeedbackModal';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
@@ -39,25 +37,6 @@ const Register = () => {
   const [imagePreviewUrl, setImagePreviewUrl] = useState("src/assets/PofilePhoto.png"); // Para la vista previa de la foto
   const [selectedRole, setSelectedRole] = useState("Conductor"); // Estado para manejar la selección del rol
   const navigate = useNavigate();
-  const fileInputRef = useRef(null); // Referencia al input de tipo file
-
-  // Estados para el modal
-  const [showModal, setShowModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState('');
-  const [modalDetails, setModalDetails] = useState('');
-
-  // Función para mostrar el modal de error
-  const handleModalError = (message, details) => {
-    setModalMessage(message);
-    setModalDetails(details);
-    setShowModal(true);
-  };
-
-  // Función para cerrar el modal y redirigir
-  const handleCloseModal = () => {
-    setShowModal(false);
-    navigate('/iniciar-sesion');
-  };
 
   // Función para validar los campos
   const validateFields = () => {
@@ -112,11 +91,14 @@ const Register = () => {
 
     // Validar teléfono
     const phoneRegex = /^[0-9]{10}$/;
-    if (phoneNumber && !phoneRegex.test(phoneNumber)) {
-      setPhoneNumberError('El número de teléfono debe tener exactamente 10 números.');
+    if (!phoneNumber) {
+      setPhoneNumberError('El número de teléfono es requerido.');
+      isValid = false;
+    } else if (!phoneRegex.test(phoneNumber)) {
+      setPhoneNumberError('El número de teléfono no es válido.');
       isValid = false;
     } else {
-      setPhoneNumberError(''); // Si está vacío o correcto, no hay error
+      setPhoneNumberError('');
     }
 
     // Validar contraseña
@@ -140,6 +122,7 @@ const Register = () => {
       surName &&
       universityId &&
       email &&
+      phoneNumber &&
       password
     ) {
       setIsButtonDisabled(false); // Habilitar el botón si todos los campos están completos
@@ -161,6 +144,7 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
 
+
     try {
       const formData = new FormData();
       formData.append('name', name);
@@ -181,11 +165,6 @@ const Register = () => {
 
       if (response.status === 201) {
         console.log('Usuario registrado correctamente');
-        
-        // Guardar el token en localStorage
-        const token = response.data.token;
-        localStorage.setItem('token', token); // Guardar token
-        
         setSteps(3); // Cambiar al paso 3 después del registro exitoso
       }
     } catch (error) {
@@ -215,7 +194,7 @@ const Register = () => {
   // Asegúrate de liberar la URL creada cuando se cambie la imagen o el componente se desmonte
   useEffect(() => {
     return () => {
-      if (imagePreviewUrl !== "src/assets/ProfilePhoto.png") {
+      if (imagePreviewUrl !== "src/assets/PofilePhoto.png") {
         URL.revokeObjectURL(imagePreviewUrl);
       }
     };
@@ -231,13 +210,6 @@ const Register = () => {
       navigate("/registrar-carro");
     } else {
       navigate("/pagina-principal");
-    }
-  };
-
-  // Función para retroceder de paso
-  const handlePreviousStep = () => {
-    if (steps > 1) {
-      setSteps(steps - 1);
     }
   };
 
@@ -276,111 +248,99 @@ const Register = () => {
           <Loader />
         </div>
       )}
-
-      {showModal && (
-        <FeedbackModal
-          type="error"
-          message={modalMessage}
-          details={modalDetails}
-          onClose={handleCloseModal}
-        />
-      )}
-
       <Card>
         {steps === 1 && (
-        <>
-        <Title>Regístrate</Title>
-        <form onSubmit={handleSubmit}>
-          
-          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', gap: '10px' }}>
-            <div style={{ display: 'flex', flexDirection: 'row'}}>
-              <InputField 
-                type="text" 
-                placeholder="Nombre" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-              />
-              {nameError && <small style={{ color: colors.third }}>{nameError}</small>}
-            </div >
-            <div style={{ display: 'flex'}}>
-              <InputField 
-                type="text" 
-                placeholder="Apellidos" 
-                value={surName} 
-                onChange={(e) => setSurName(e.target.value)} 
-              />
-              {surNameError && <small style={{ color: colors.third}}>{surNameError}</small>}
-            </div>
+         <>
+         <Title>Regístrate</Title>
+         <form onSubmit={handleSubmit}>
+           <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', gap: '7px' }}>
+             <div>
+               <InputField 
+                 type="text" 
+                 placeholder="Nombre" 
+                 value={name} 
+                 onChange={(e) => setName(e.target.value)} 
+               />
+               {nameError && <small style={{ color: colors.third }}>{nameError}</small>}
+             </div>
+             <div>
+               <InputField 
+                 type="text" 
+                 placeholder="Apellidos" 
+                 value={surName} 
+                 onChange={(e) => setSurName(e.target.value)} 
+               />
+               {surNameError && <small style={{ color: colors.third}}>{surNameError}</small>}
+             </div>
+           </div>
+
+           <div>
+             <InputField 
+               type="text" 
+               placeholder="ID de la Universidad" 
+               value={universityId} 
+               onChange={(e) => setUniversityId(e.target.value)} 
+             />
+             {universityIdError && <small style={{ color: colors.third }}>{universityIdError}</small>}
+           </div>
+
+           <div>
+             <InputField 
+               type="email" 
+               placeholder="Correo Electrónico" 
+               value={email} 
+               onChange={(e) => setEmail(e.target.value)} 
+             />
+             {emailError && <small style={{ color: colors.third }}>{emailError}</small>}
+           </div>
+
+           <div>
+             <InputField 
+               type="tel" 
+               placeholder="Teléfono" 
+               value={phoneNumber} 
+               onChange={(e) => setPhoneNumber(e.target.value)} 
+             />
+             {phoneNumberError && <small style={{ color: colors.third }}>{phoneNumberError}</small>}
+           </div>
+
+           <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+             <InputField 
+               type={showPassword ? 'text' : 'password'} 
+               placeholder="Contraseña" 
+               value={password} 
+               onChange={(e) => setPassword(e.target.value)} 
+             />
+             <button
+               type="button"
+               onClick={() => setShowPassword(!showPassword)}
+               style={{
+                 background: 'transparent',
+                 border: 'none',
+                 cursor: 'pointer',
+                 position: 'absolute',
+                 right: '10px',
+                 top: '50%',
+                 transform: 'translateY(-50%)',
+                 zIndex: 1,
+               }}
+             >
+               <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} size="lg" />
+             </button>
+           </div>
+           {passwordError && <small style={{ color: colors.third }}>{passwordError}</small>}
+
+           <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <Button type="submit" label="Registrarse" primary disabled={isButtonDisabled} onClick={handleNextStep} />
           </div>
 
-          <div>
-            <InputField 
-              type="text" 
-              placeholder="ID de la Universidad" 
-              value={universityId} 
-              onChange={(e) => setUniversityId(e.target.value)} 
-            />
-            {universityIdError && <small style={{ color: colors.third }}>{universityIdError}</small>}
-          </div>
+         </form>
 
-          <div>
-            <InputField 
-              type="email" 
-              placeholder="Correo Electrónico" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-            />
-            {emailError && <small style={{ color: colors.third }}>{emailError}</small>}
-          </div>
-
-          <div>
-            <InputField 
-              type="tel" 
-              placeholder="Teléfono" 
-              value={phoneNumber} 
-              onChange={(e) => setPhoneNumber(e.target.value)} 
-            />
-            {phoneNumberError && <small style={{ color: colors.third }}>{phoneNumberError}</small>}
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-            <InputField 
-              type={showPassword ? 'text' : 'password'} 
-              placeholder="Contraseña" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                position: 'absolute',
-                right: '10px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                zIndex: 1,
-                color: 'white'
-              }}
-            >
-              <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} size="lg" />
-            </button>
-          </div>
-          {passwordError && <small style={{ color: colors.third }}>{passwordError}</small>}
-
-          <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-           <Button type="submit" label="Registrarse" primary disabled={isButtonDisabled} onClick={handleNextStep} />
-         </div>
-
-        </form>
-
-        <Text>
-          ¿Ya tienes una cuenta?  
-          <Link to="/iniciar-sesion" style={{ color: colors.third, textDecoration: 'none' }}> Inicia sesión</Link>
-        </Text>
-      </>
+         <Text>
+           ¿Ya tienes una cuenta?  
+           <Link to="/iniciar-sesion" style={{ color: colors.third, textDecoration: 'none' }}> Inicia sesión</Link>
+         </Text>
+       </>
         )}
 
         {steps === 2 && ( // Paso 2: Agregar foto de perfil y registrar
@@ -394,29 +354,19 @@ const Register = () => {
                 />
 
                 <div style={addButtonContainerStyle}>
+                  <label htmlFor="imageUpload" style={{ cursor: 'pointer' }}>
+                    <AddButton />
+                  </label>
                   <input
                     type="file"
                     id="imageUpload"
                     style={{ display: 'none' }}
                     onChange={handleImageUpload}
                     accept="image/*"
-                    ref={fileInputRef}
                   />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current.click()}
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <AddButton />
-                  </button>
                 </div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                <Button onClick={handlePreviousStep} label="Anterior" />
+              <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                 <Button type="submit" label="¡Listo!" primary />
               </div>
             </form>

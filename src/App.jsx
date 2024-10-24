@@ -1,11 +1,14 @@
 // src/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+
 import LandingPage from './pages/LandingPage.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import ProfileInfo from './pages/ProfileInfo.jsx';
 import RegisterCar from './pages/RegisterCar.jsx';
+
 
 const App = () => {
   return (
