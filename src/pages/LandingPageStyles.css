@@ -1,0 +1,19 @@
+
+
+.inicial-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; 
+  }
+  
+  .logo {
+    width: 150px; 
+    margin-bottom: 40px;
+  }
+  
+  button {
+    margin: 10px 0; 
+  }
+  

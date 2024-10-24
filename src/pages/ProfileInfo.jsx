@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Cookies from 'js-cookie';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import Title from '../components/Title';

@@ -38,13 +38,6 @@ const Register = () => {
   const [selectedRole, setSelectedRole] = useState("Conductor"); // Estado para manejar la selección del rol
   const navigate = useNavigate();
 
-  // Verificar si el usuario ya está registrado (token en localStorage)
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      navigate('/pagina-principal'); // Redirige si ya está autenticado
-    }
-  }, [navigate]);
 
   // Función para validar los campos
   const validateFields = () => {
@@ -99,14 +92,11 @@ const Register = () => {
 
     // Validar teléfono
     const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneNumber) {
-      setPhoneNumberError('El número de teléfono es requerido.');
-      isValid = false;
-    } else if (!phoneRegex.test(phoneNumber)) {
-      setPhoneNumberError('El número de teléfono no es válido.');
+    if (phoneNumber && !phoneRegex.test(phoneNumber)) {
+      setPhoneNumberError('El número de teléfono debe tener exactamente 10 números.');
       isValid = false;
     } else {
-      setPhoneNumberError('');
+      setPhoneNumberError(''); // Si está vacío o correcto, no hay error
     }
 
     // Validar contraseña
@@ -130,7 +120,6 @@ const Register = () => {
       surName &&
       universityId &&
       email &&
-      phoneNumber &&
       password
     ) {
       setIsButtonDisabled(false); // Habilitar el botón si todos los campos están completos

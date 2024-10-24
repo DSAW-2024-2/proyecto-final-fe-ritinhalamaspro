@@ -28,13 +28,6 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  // Verificar si el usuario ya está logueado (token en localStorage)
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      navigate('/pagina-principal'); // Redirige si ya está autenticado
-    }
-  }, [navigate]);
 
   const headingStyle = {
     textAlign: 'center',
