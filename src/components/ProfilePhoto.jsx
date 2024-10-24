@@ -36,7 +36,7 @@ const ProfilePhoto = ({ imageUrl, size = '150px', borderColor = colors.white, bo
         right: '10px',
         zIndex: '20',     // Asegura que el botón esté por encima de la imagen
       }}>
-        <AddButton />
+        
       </div>
     </div>
   );

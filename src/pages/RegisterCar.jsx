@@ -20,6 +20,40 @@ const RegisterCar = () => {
   const [loading, setLoading] = useState(false); // Control de carga
   const navigate = useNavigate(); // Hook para navegar entre rutas
 
+  // Estados para errores de validación
+  const [plateError, setPlateError] = useState('');
+  const [capacityError, setCapacityError] = useState('');
+
+  // Calcula si todos los campos están llenos
+  const isStep1Filled = plate && capacity && brand && model;
+
+  // Función de validación
+  const validateFields = () => {
+    let isValid = true;
+
+    // Validar placa
+    const platePattern = /^[A-Za-z]{3}\d{3}$/;
+    if (!platePattern.test(plate)) {
+      setPlateError('La placa debe tener 3 letras y 3 números');
+      isValid = false;
+    } else {
+      setPlateError('');
+    }
+
+    // Validar capacidad
+    const capacityPattern = /^\d+$/;
+    if (!capacityPattern.test(capacity)) {
+      setCapacityError('La capacidad debe ser un número');
+      isValid = false;
+    } else {
+      setCapacityError('');
+    }
+
+    // Puedes agregar validaciones para 'brand' y 'model' si es necesario
+
+    return isValid;
+  };
+
   // Maneja el envío del formulario al servidor
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,7 +74,7 @@ const RegisterCar = () => {
       // Hacer la solicitud POST al servidor con el token en los headers
       const response = await axios.post('https://proyecto-final-be-ritinhalamaspro.vercel.app/register_car', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          // No establecer 'Content-Type' manualmente
           'Authorization': `Bearer ${token}`, // Incluir el token en los headers
         },
       });
@@ -56,8 +90,18 @@ const RegisterCar = () => {
     }
   };
 
-  const handleNextStep = () => {
-    setCurrentStep(currentStep + 1);
+  const handleNextStep = (e) => {
+    e.preventDefault();
+    const isValid = validateFields();
+    if (isValid) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePreviousStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
   };
 
   return (
@@ -68,34 +112,54 @@ const RegisterCar = () => {
             <Title>¡Registra <span style={{ color: colors.third }}><strong>tu carro</strong></span>!</Title>
 
             {/* Formulario para registrar los detalles del carro */}
-            <form>
-              <InputField 
-                type="text" 
-                placeholder="Placa" 
-                value={plate} 
-                onChange={(e) => setPlate(e.target.value)} 
-              />
-              <InputField 
-                type="text" 
-                placeholder="Capacidad Vehículo" 
-                value={capacity} 
-                onChange={(e) => setCapacity(e.target.value)} 
-              />
-              <InputField 
-                type="text" 
-                placeholder="Marca" 
-                value={brand} 
-                onChange={(e) => setBrand(e.target.value)} 
-              />
-              <InputField 
-                type="text" 
-                placeholder="Modelo" 
-                value={model} 
-                onChange={(e) => setModel(e.target.value)} 
-              />
+            <form onSubmit={handleNextStep}>
+              <div>
+                <InputField 
+                  type="text" 
+                  placeholder="Placa" 
+                  value={plate} 
+                  onChange={(e) => {
+                    const value = e.target.value.toUpperCase();
+                    setPlate(value);
+                  }} 
+                  error={plateError}
+                />
+                {plateError && <small style={{ color: colors.third }}>{plateError}</small>}
+              </div>
+
+              <div>
+                <InputField 
+                  type="text" 
+                  placeholder="Capacidad Vehículo" 
+                  value={capacity} 
+                  onChange={(e) => {
+                    setCapacity(e.target.value);
+                  }} 
+                  error={capacityError}
+                />
+                {capacityError && <small style={{ color: colors.third }}>{capacityError}</small>}
+              </div>
+
+              <div>
+                <InputField 
+                  type="text" 
+                  placeholder="Marca" 
+                  value={brand} 
+                  onChange={(e) => setBrand(e.target.value)} 
+                />
+              </div>
+
+              <div>
+                <InputField 
+                  type="text" 
+                  placeholder="Modelo" 
+                  value={model} 
+                  onChange={(e) => setModel(e.target.value)} 
+                />
+              </div>
 
               <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                <Button onClick={handleNextStep} label="Siguiente" primary />
+                <Button type="submit" label="Siguiente" primary disabled={!isStep1Filled} />
               </div>
             </form>
           </>
@@ -107,10 +171,15 @@ const RegisterCar = () => {
 
             {/* Formulario para agregar la foto del carro */}
             <form>
-              <AddPhoto label="Agregar foto del carro" onPhotoChange={setCarPhoto} />
+              <AddPhoto
+                label="Agregar foto del carro"
+                onPhotoChange={setCarPhoto}
+                photo={carPhoto} // Pasamos la foto seleccionada
+              />
               
-              <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                <Button onClick={handleNextStep} label="Siguiente" primary />
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                <Button onClick={handlePreviousStep} label="Anterior" />
+                <Button onClick={handleNextStep} label="Siguiente" primary disabled={!carPhoto} />
               </div>
             </form>
           </>
@@ -122,10 +191,15 @@ const RegisterCar = () => {
 
             {/* Formulario para agregar la foto del SOAT */}
             <form onSubmit={handleSubmit}>
-              <AddPhoto label="Agregar foto del SOAT" onPhotoChange={setSoatPhoto} />
+              <AddPhoto
+                label="Agregar foto del SOAT"
+                onPhotoChange={setSoatPhoto}
+                photo={soatPhoto} // Pasamos la foto seleccionada
+              />
 
-              <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                <Button type="submit" label="¡Listo!" primary />
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                <Button onClick={handlePreviousStep} label="Anterior" />
+                <Button type="submit" label="¡Listo!" primary disabled={!soatPhoto} />
               </div>
             </form>
           </>
@@ -133,7 +207,7 @@ const RegisterCar = () => {
 
         {loading && (
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-            <Loader /> {/* Reemplaza el texto "Cargando..." con el componente Loader */}
+            <Loader />
           </div>
         )}
       </Card>

@@ -1,9 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 import Button from '../components/Button';
-import logo from '../assets/logo.png';
+import logo from '../assets/Logo.png';
 
-// Componente estilizado
+// Estilos con styled-components
 const InicialContainer = styled.div`
   display: flex;
   flex-direction: column;

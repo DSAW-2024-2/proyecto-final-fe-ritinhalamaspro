@@ -1,3 +1,4 @@
+// ProfileInfo.jsx
 import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -48,8 +49,9 @@ const ProfileInfo = () => {
       console.log("URL de la imagen:", data.photoURL); // Verifica que la URL esté presente y sea correcta
 
       setProfileData(data);
-      setImage(data.photoURL); // Asume que 'photo' es el campo de la imagen en la respuesta de la API
-      console.log('Imagen actual:', image);
+      console.log("Respuesta completa del perfil:", data);
+      setImage(data.photoURL); // Usar 'photoURL' en lugar de 'photo'
+      console.log('Imagen actual:', data.photoURL); // Imprime el valor correcto
 
       setLoading(false); // Detener el estado de carga después de obtener los datos
     } catch (error) {
@@ -110,6 +112,7 @@ const ProfileInfo = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImage(reader.result); // Actualiza la imagen de perfil con la seleccionada
+        // Opcional: Puedes enviar la nueva imagen al backend aquí si lo deseas
       };
       reader.readAsDataURL(file);
     }
@@ -139,7 +142,7 @@ const ProfileInfo = () => {
       <Card style={{ position: 'relative', paddingTop: '80px' }}>
         <div style={profilePhotoContainerStyle}>
           <ProfilePhoto
-            imageUrl={image ? image : 'src/assets/PofilePhoto.png'} // Usa la imagen devuelta por la API o la predeterminada
+            imageUrl={image ? image : 'src/assets/ProfilePhoto.png'} // Usa 'ProfilePhoto.png' en lugar de 'PofilePhoto.png'
             size="170px"
           />
         </div>
@@ -152,7 +155,7 @@ const ProfileInfo = () => {
           <div style={profileContainerStyle}>
             <div style={addButtonContainerStyle}>
               <label htmlFor="imageUpload">
-                
+                {/* Puedes agregar un botón o icono aquí si deseas */}
               </label>
               <input
                 type="file"
@@ -161,13 +164,14 @@ const ProfileInfo = () => {
                 onChange={handleImageUpload}
                 accept="image/*"
               />
+             
             </div>
           </div>
           <Text>ID: {profileData.universityID ? profileData.universityID : 'ID no disponible'}</Text>
           <Text>Correo: {profileData.email ? profileData.email : 'Correo no disponible'}</Text>
           <Text>Teléfono: {profileData.phoneNumber ? profileData.phoneNumber : 'Teléfono no disponible'}</Text>
-          <img src={image} alt="Profile" />
-
+          {/* Puedes eliminar la etiqueta <img> si ya estás usando el componente ProfilePhoto */}
+          {/* <img src={image} alt="Profile" /> */}
         </form>
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
           <Button label="Cerrar Sesión" primary onClick={handleLogout} />

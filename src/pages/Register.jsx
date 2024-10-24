@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// Register.jsx
+import React, { useState, useEffect, useRef } from 'react';
 import Card from '../components/Card';
 import InputField from '../components/InputField';
 import Button from '../components/Button';
@@ -10,6 +11,7 @@ import axios from 'axios';
 import Loader from '../components/Loader';
 import ProfilePhoto from '../components/ProfilePhoto';
 import AddButton from '../components/AddButton';
+import FeedbackModal from '../components/FeedbackModal';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
@@ -37,7 +39,25 @@ const Register = () => {
   const [imagePreviewUrl, setImagePreviewUrl] = useState("src/assets/PofilePhoto.png"); // Para la vista previa de la foto
   const [selectedRole, setSelectedRole] = useState("Conductor"); // Estado para manejar la selección del rol
   const navigate = useNavigate();
+  const fileInputRef = useRef(null); // Referencia al input de tipo file
 
+  // Estados para el modal
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalDetails, setModalDetails] = useState('');
+
+  // Función para mostrar el modal de error
+  const handleModalError = (message, details) => {
+    setModalMessage(message);
+    setModalDetails(details);
+    setShowModal(true);
+  };
+
+  // Función para cerrar el modal y redirigir
+  const handleCloseModal = () => {
+    setShowModal(false);
+    navigate('/iniciar-sesion');
+  };
 
   // Función para validar los campos
   const validateFields = () => {
@@ -195,7 +215,7 @@ const Register = () => {
   // Asegúrate de liberar la URL creada cuando se cambie la imagen o el componente se desmonte
   useEffect(() => {
     return () => {
-      if (imagePreviewUrl !== "src/assets/PofilePhoto.png") {
+      if (imagePreviewUrl !== "src/assets/ProfilePhoto.png") {
         URL.revokeObjectURL(imagePreviewUrl);
       }
     };
@@ -211,6 +231,13 @@ const Register = () => {
       navigate("/registrar-carro");
     } else {
       navigate("/pagina-principal");
+    }
+  };
+
+  // Función para retroceder de paso
+  const handlePreviousStep = () => {
+    if (steps > 1) {
+      setSteps(steps - 1);
     }
   };
 
@@ -249,11 +276,21 @@ const Register = () => {
           <Loader />
         </div>
       )}
+
+      {showModal && (
+        <FeedbackModal
+          type="error"
+          message={modalMessage}
+          details={modalDetails}
+          onClose={handleCloseModal}
+        />
+      )}
+
       <Card>
         {steps === 1 && (
          <>
          <Title>Regístrate</Title>
-         <form onSubmit={handleSubmit}>
+         <form onSubmit={handleNextStep}>
            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', gap: '7px' }}>
              <div>
                <InputField 
@@ -332,7 +369,7 @@ const Register = () => {
            {passwordError && <small style={{ color: colors.third }}>{passwordError}</small>}
 
            <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-            <Button type="submit" label="Registrarse" primary disabled={isButtonDisabled} onClick={handleNextStep} />
+            <Button type="submit" label="Registrarse" primary disabled={isButtonDisabled} />
           </div>
 
          </form>
@@ -355,19 +392,29 @@ const Register = () => {
                 />
 
                 <div style={addButtonContainerStyle}>
-                  <label htmlFor="imageUpload" style={{ cursor: 'pointer' }}>
-                    <AddButton />
-                  </label>
                   <input
                     type="file"
                     id="imageUpload"
                     style={{ display: 'none' }}
                     onChange={handleImageUpload}
                     accept="image/*"
+                    ref={fileInputRef}
                   />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current.click()}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <AddButton />
+                  </button>
                 </div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                <Button onClick={handlePreviousStep} label="Anterior" />
                 <Button type="submit" label="¡Listo!" primary />
               </div>
             </form>
