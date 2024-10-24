@@ -19,9 +19,10 @@ const ProfilePhoto = ({ imageUrl, size = '150px', borderColor = colors.white, bo
   };
 
   const imageStyle = {
-    width: '100%',   // Asegura que la imagen llene el círculo
-    height: '100%',  // Asegura que la imagen llene el círculo
-    objectFit: 'cover',  // Asegura que la imagen se escala correctamente sin distorsionar
+    width: '100%',     // Asegura que la imagen llene el círculo
+    height: '100%',    // Asegura que la imagen llene el círculo
+    objectFit: 'cover', // Mantiene las proporciones de la imagen sin distorsión
+    display: 'block',  // Asegura que la imagen se renderice como bloque y ocupe el espacio del contenedor
   };
 
   return (

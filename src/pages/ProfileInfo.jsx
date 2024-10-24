@@ -7,6 +7,7 @@ import Text from '../components/Text';
 import ProfilePhoto from '../components/ProfilePhoto';
 import AddButton from '../components/AddButton';
 import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate para redireccionar
+import Loader from '../components/Loader'; // Importa el componente Loader
 
 const ProfileInfo = () => {
   const [profileData, setProfileData] = useState(null);
@@ -14,6 +15,10 @@ const ProfileInfo = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true); // Estado para manejar la carga
   const navigate = useNavigate(); // Hook para redirigir
+
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token'); // Obtener el token del localStorage
@@ -41,7 +46,12 @@ const ProfileInfo = () => {
       }
 
       const data = await response.json();
+      console.log("URL de la imagen:", data.photoURL); // Verifica que la URL esté presente y sea correcta
+
       setProfileData(data);
+      setImage(data.photoURL); // Asume que 'photo' es el campo de la imagen en la respuesta de la API
+      console.log('Imagen actual:', image);
+
       setLoading(false); // Detener el estado de carga después de obtener los datos
     } catch (error) {
       console.error('Error:', error);
@@ -100,7 +110,7 @@ const ProfileInfo = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImage(reader.result);
+        setImage(reader.result); // Actualiza la imagen de perfil con la seleccionada
       };
       reader.readAsDataURL(file);
     }
@@ -113,7 +123,11 @@ const ProfileInfo = () => {
 
   // Mostrar el estado de carga mientras se obtiene la información
   if (loading) {
-    return <div>Cargando...</div>;
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Loader /> {/* Reemplaza el texto "Cargando..." con el componente Loader */}
+      </div>
+    );
   }
 
   // Verificación adicional para evitar el error de nulos
@@ -126,16 +140,20 @@ const ProfileInfo = () => {
       <Card style={{ position: 'relative', paddingTop: '80px' }}>
         <div style={profilePhotoContainerStyle}>
           <ProfilePhoto
-            imageUrl={image ? image : 'src/assets/ProfilePhoto.png'}
+            imageUrl={image ? image : 'src/assets/PofilePhoto.png'} // Usa la imagen devuelta por la API o la predeterminada
             size="170px"
           />
         </div>
-        <Title>{profileData.firstName ? `${profileData.firstName} ${profileData.lastName}` : 'Nombre no disponible'}</Title>
+        <Title>
+          {profileData.name && profileData.surName
+            ? `${capitalizeFirstLetter(profileData.name)} ${capitalizeFirstLetter(profileData.surName)}`
+            : 'Nombre no disponible'}
+        </Title>
         <form>
           <div style={profileContainerStyle}>
             <div style={addButtonContainerStyle}>
               <label htmlFor="imageUpload">
-                <AddButton />
+                
               </label>
               <input
                 type="file"
@@ -146,9 +164,11 @@ const ProfileInfo = () => {
               />
             </div>
           </div>
-          <Text>ID: {profileData.id ? profileData.id : 'ID no disponible'}</Text>
+          <Text>ID: {profileData.universityID ? profileData.universityID : 'ID no disponible'}</Text>
           <Text>Correo: {profileData.email ? profileData.email : 'Correo no disponible'}</Text>
-          <Text>Teléfono: {profileData.phone ? profileData.phone : 'Teléfono no disponible'}</Text>
+          <Text>Teléfono: {profileData.phoneNumber ? profileData.phoneNumber : 'Teléfono no disponible'}</Text>
+          <img src={image} alt="Profile" />
+
         </form>
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
           <Button label="Cerrar Sesión" primary onClick={handleLogout} />

@@ -10,8 +10,6 @@ const App = () => {
   return (
     <Router>
       <div style={{ position: 'relative' }}>
-        
-
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/iniciar-sesion" element={<Login />} />
