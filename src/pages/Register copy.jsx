@@ -38,14 +38,6 @@ const Register = () => {
   const [selectedRole, setSelectedRole] = useState("Conductor"); // Estado para manejar la selección del rol
   const navigate = useNavigate();
 
-  // Verificar si el usuario ya está registrado (token en localStorage)
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      navigate('/pagina-principal'); // Redirige si ya está autenticado
-    }
-  }, [navigate]);
-
   // Función para validar los campos
   const validateFields = () => {
     let isValid = true;
@@ -152,6 +144,7 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
 
+
     try {
       const formData = new FormData();
       formData.append('name', name);
@@ -172,11 +165,6 @@ const Register = () => {
 
       if (response.status === 201) {
         console.log('Usuario registrado correctamente');
-        
-        // Guardar el token en localStorage
-        const token = response.data.token;
-        localStorage.setItem('token', token); // Guardar token
-        
         setSteps(3); // Cambiar al paso 3 después del registro exitoso
       }
     } catch (error) {

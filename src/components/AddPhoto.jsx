@@ -1,10 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import AddPhotoIcon from '../assets/addPhoto.svg'; // Asumiendo que el icono está en la carpeta assets
 import colors from './colors'; // Importamos el archivo de colores
 import AddButton from './AddButton';
 
-const AddPhoto = ({ children }) => {
+const AddPhoto = ({ label, onPhotoChange }) => {
   const fileInputRef = useRef(null); // Creamos una referencia al input
+  const [preview, setPreview] = useState(null); // Estado para la vista previa de la imagen
 
   // Estilos del contenedor de la tarjeta
   const cardStyle = {
@@ -25,12 +26,20 @@ const AddPhoto = ({ children }) => {
     paddingBottom: '80px', // Añadimos padding para que el botón no se solape
   };
 
-  // Estilos del icono
+  // Estilos del icono y de la imagen de vista previa
   const iconStyle = {
-    width: '40px',    // Tamaño del icono
+    width: '40px',
     height: '40px',
     fill: colors.details,
     cursor: 'pointer', // Para que el cursor cambie a mano
+  };
+
+  const previewStyle = {
+    width: '100px',
+    height: '100px',
+    objectFit: 'cover', // Para que la imagen encaje en el contenedor
+    borderRadius: '10px',
+    marginBottom: '10px',
   };
 
   // Estilos del input para ocultarlo
@@ -53,8 +62,9 @@ const AddPhoto = ({ children }) => {
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      console.log('Archivo seleccionado:', file);
-      // Aquí puedes manejar la foto, como cargarla o mostrar una vista previa.
+      const fileURL = URL.createObjectURL(file); // Creamos la URL de la imagen seleccionada
+      setPreview(fileURL); // Actualizamos el estado con la URL de la imagen
+      onPhotoChange(file); // Pasamos la imagen seleccionada al componente padre
     }
   };
 
@@ -68,22 +78,26 @@ const AddPhoto = ({ children }) => {
         onChange={handleFileChange}
         accept="image/*" // Solo permite imágenes
       />
-      <img
-        src={AddPhotoIcon}
-        alt="Add Photo"
-        style={iconStyle}
-        onClick={handleIconClick} 
-      />
-      
-      {children}
 
-      <div style={{ 
-        position: 'absolute', 
-        bottom: '20px', 
-        right: '50px', 
-        zIndex: '10' 
+      {/* Mostrar la vista previa si hay una imagen seleccionada, de lo contrario mostrar el ícono */}
+      {preview ? (
+        <img src={preview} alt="Vista previa" style={previewStyle} />
+      ) : (
+        <img
+          src={AddPhotoIcon}
+          alt="Add Photo"
+          style={iconStyle}
+          onClick={handleIconClick}
+        />
+      )}
+
+      <div style={{
+        position: 'absolute',
+        bottom: '20px',
+        right: '50px',
+        zIndex: '10'
       }}>
-        <AddButton />
+
       </div>
     </div>
   );
