@@ -100,7 +100,7 @@ const ProfileInfo = () => {
 
   const profilePhotoContainerStyle = {
     position: 'absolute',
-    top: '-85px',
+    top: '-55px',
     left: '50%',
     transform: 'translateX(-50%)',
     zIndex: '1',

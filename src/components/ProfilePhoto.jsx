@@ -1,6 +1,6 @@
 // ProfilePhoto.jsx
 import React from 'react';
-import colors from './colors'; // Importamos los colores
+import colors from './Colors'; // Importamos los colores
 import AddButton from './AddButton'; // Asegúrate de que el AddButton esté bien importado
 
 const ProfilePhoto = ({ imageUrl, size = '150px', borderColor = colors.white, boxShadowColor = 'rgba(0, 0, 0, 0.3)' }) => {

@@ -5,7 +5,7 @@ import Button from '../components/Button';
 import Title from '../components/Title';
 import Text from '../components/Text';
 import { Link, useNavigate } from 'react-router-dom';
-import colors from '../components/colors'; // Importamos el archivo de colores
+import colors from '../components/Colors'; // Importamos el archivo de colores
 import axios from 'axios';
 import Loader from '../components/Loader'; // Importa el componente Loader
 import FeedbackModal from '../components/FeedbackModal'; // Importa el modal de feedback

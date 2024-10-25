@@ -5,7 +5,7 @@ import InputField from '../components/InputField';
 import Button from '../components/Button';
 import Title from '../components/Title';
 import Loader from '../components/Loader'; // Importa tu componente Loader
-import colors from '../components/colors';
+import colors from '../components/Colors';
 import AddPhoto from '../components/AddPhoto'; // Importa el componente AddPhoto
 import axios from 'axios';
 

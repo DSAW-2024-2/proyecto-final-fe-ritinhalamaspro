@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import colors from './colors'; // Importamos el archivo de colores
+import colors from './Colors'; // Importamos el archivo de colores
 
 // Estilo para el botón utilizando styled-components
 const StyledButton = styled.button`

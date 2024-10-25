@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import color from './colors';
+import color from './Colors';
 
 const InputField = ({ type, placeholder, value, onChange }) => {
   const [hasText, setHasText] = useState(false);  // Estado para saber si hay texto

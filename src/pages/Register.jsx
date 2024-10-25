@@ -6,7 +6,7 @@ import Button from '../components/Button';
 import Title from '../components/Title';
 import Text from '../components/Text';
 import { Link, useNavigate } from 'react-router-dom';
-import colors from '../components/colors';
+import colors from '../components/Colors';
 import axios from 'axios';
 import Loader from '../components/Loader';
 import ProfilePhoto from '../components/ProfilePhoto';

@@ -5,7 +5,7 @@ import confirmationIcon from '../assets/confirmation.svg';
 import errorIcon from '../assets/error.svg';
 import Title from './Title';
 import Text from './Text';
-import colors from './colors'; // Importamos los colores
+import colors from './Colors'; // Importamos los colores
 
 const FeedbackModal = ({ type, message, details, onClose }) => {
   const icon = type === 'confirmation' ? confirmationIcon : errorIcon;

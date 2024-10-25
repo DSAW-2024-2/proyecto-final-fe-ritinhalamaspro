@@ -1,6 +1,6 @@
 // src/components/Text.jsx
 import React from 'react';
-import colors from './colors'; // Asegúrate de importar el archivo de colores
+import colors from './Colors'; // Asegúrate de importar el archivo de colores
 
 const Text = ({ children }) => {
   const textStyle = {

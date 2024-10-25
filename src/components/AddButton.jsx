@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import colors from './colors';
+import colors from './Colors';
 
 const AddButton = () => {
   const [isHovered, setIsHovered] = useState(false);

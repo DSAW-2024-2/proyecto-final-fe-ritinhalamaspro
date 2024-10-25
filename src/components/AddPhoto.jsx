@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import AddPhotoIcon from '../assets/addPhoto.svg'; // Asumiendo que el icono está en la carpeta assets
-import colors from './colors'; // Importamos el archivo de colores
+import colors from './Colors'; // Importamos el archivo de colores
 import AddButton from './AddButton';
 
 const AddPhoto = ({ label, onPhotoChange }) => {
