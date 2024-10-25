@@ -15,6 +15,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 const Login = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Verificar si el usuario ya está autenticado
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/pagina-principal');
+    }
+  }
+  , []);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false); // Estado para mostrar u ocultar la contraseña
@@ -26,7 +37,6 @@ const Login = () => {
   const [modalMessage, setModalMessage] = useState(''); // Mensaje que se mostrará en el modal
   const [modalDetails, setModalDetails] = useState(''); // Detalles del mensaje en el modal
 
-  const navigate = useNavigate();
 
 
   const headingStyle = {

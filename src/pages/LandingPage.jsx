@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import Button from '../components/Button';
 import logo from '../assets/Logo.png';
+import { useNavigate } from 'react-router-dom';
 
 // Estilos con styled-components
 const InicialContainer = styled.div`
@@ -22,6 +23,17 @@ const StyledButton = styled(Button)`
 `;
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Verificar si el usuario ya está autenticado
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/pagina-principal');
+    }
+  }
+  , []);
+
   return (
     <InicialContainer>
       <Logo src={logo} alt="Logo" />

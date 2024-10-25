@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import Card from '../components/Card';
 import InputField from '../components/InputField';
@@ -20,6 +20,14 @@ const RegisterCar = () => {
   const [loading, setLoading] = useState(false); // Control de carga
   const navigate = useNavigate(); // Hook para navegar entre rutas
 
+  useEffect(() => {
+    // Verificar si el usuario ya está autenticado
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/');
+    }
+  }
+  , []);
   // Estados para errores de validación
   const [plateError, setPlateError] = useState('');
   const [capacityError, setCapacityError] = useState('');

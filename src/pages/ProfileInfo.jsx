@@ -10,11 +10,21 @@ import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate p
 import Loader from '../components/Loader'; // Importa el componente Loader
 
 const ProfileInfo = () => {
+  const navigate = useNavigate(); // Hook para redirigir
+
+  useEffect(() => {
+    // Verificar si el usuario ya está autenticado
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/');
+    }
+  }
+  , []);
+
   const [profileData, setProfileData] = useState(null);
   const [image, setImage] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true); // Estado para manejar la carga
-  const navigate = useNavigate(); // Hook para redirigir
 
   const capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
