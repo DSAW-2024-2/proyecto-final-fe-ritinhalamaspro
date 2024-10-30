@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
-import AddPhotoIcon from '../assets/addPhoto.svg'; // Asumiendo que el icono está en la carpeta assets
-import colors from './Colors'; // Importamos el archivo de colores
-import AddButton from './AddButton';
+import AddPhotoIcon from '../../assets/addPhoto.svg'; // Asumiendo que el icono está en la carpeta assets
+import colors from '../../assets/Colors'; // Importamos el archivo de colores
 
 const AddPhoto = ({ label, onPhotoChange }) => {
   const fileInputRef = useRef(null); // Creamos una referencia al input
@@ -10,11 +9,10 @@ const AddPhoto = ({ label, onPhotoChange }) => {
   // Estilos del contenedor de la tarjeta
   const cardStyle = {
     background: 'linear-gradient(to bottom right, rgba(0, 0, 0, 0.156), rgba(0, 0, 0, 0.072))',
-    padding: '60px',
     borderRadius: '15px',
     boxShadow: `0 8px 16px rgba(0, 0, 0, 0.3)`,
     width: '100%',
-    maxWidth: '250px',
+    height:'10em',
     margin: '70px auto 70px',
     color: colors.details,
     border: `1px solid ${colors.third}`,
@@ -23,7 +21,6 @@ const AddPhoto = ({ label, onPhotoChange }) => {
     alignItems: 'center',
     position: 'relative', // Para posicionar el icono y el botón
     flexDirection: 'column', // Asegura que el contenido se acomode en columna
-    paddingBottom: '80px', // Añadimos padding para que el botón no se solape
   };
 
   // Estilos del icono y de la imagen de vista previa
@@ -35,11 +32,11 @@ const AddPhoto = ({ label, onPhotoChange }) => {
   };
 
   const previewStyle = {
-    width: '100px',
-    height: '100px',
+    width: '100%',
+    height: '100%',
     objectFit: 'cover', // Para que la imagen encaje en el contenedor
     borderRadius: '10px',
-    marginBottom: '10px',
+    zIndex: '-1', // Asegura que la imagen esté por encima del ícono
   };
 
   // Estilos del input para ocultarlo

@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import Button from '../components/Button';
+import Button from '../components/common/Button';
 import logo from '../assets/Logo.png';
 import { useNavigate } from 'react-router-dom';
+import { Container } from '../components/common/CommonStyles';
 
 // Estilos con styled-components
 const InicialContainer = styled.div`
@@ -35,11 +36,11 @@ const LandingPage = () => {
   , []);
 
   return (
-    <InicialContainer>
+    <Container>
       <Logo src={logo} alt="Logo" />
       <StyledButton to="/iniciar-sesion" label="Iniciar Sesión" primary />
       <StyledButton to="/registrarse" label="Registrarse" />
-    </InicialContainer>
+    </Container>
   );
 };
 

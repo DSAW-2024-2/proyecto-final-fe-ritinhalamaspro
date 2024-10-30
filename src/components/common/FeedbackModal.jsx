@@ -1,11 +1,10 @@
 // FeedbackModal.jsx
 import React from 'react';
 import PropTypes from 'prop-types';
-import confirmationIcon from '../assets/confirmation.svg';
-import errorIcon from '../assets/error.svg';
-import Title from './Title';
-import Text from './Text';
-import colors from './Colors'; // Importamos los colores
+import confirmationIcon from '../../assets/confirmation.svg';
+import errorIcon from '../../assets/error.svg';
+import colors from '../../assets/Colors'; // Importamos los colores
+import { Text, Title } from './CommonStyles';
 
 const FeedbackModal = ({ type, message, details, onClose }) => {
   const icon = type === 'confirmation' ? confirmationIcon : errorIcon;

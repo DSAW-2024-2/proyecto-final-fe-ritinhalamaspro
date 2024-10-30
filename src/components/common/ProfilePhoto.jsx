@@ -1,7 +1,6 @@
 // ProfilePhoto.jsx
 import React from 'react';
-import colors from './Colors'; // Importamos los colores
-import AddButton from './AddButton'; // Asegúrate de que el AddButton esté bien importado
+import colors from '../../assets/Colors'; // Importamos los colores
 
 const ProfilePhoto = ({ imageUrl, size = '150px', borderColor = colors.white, boxShadowColor = 'rgba(0, 0, 0, 0.3)' }) => {
   const circleStyle = {
@@ -36,6 +35,7 @@ const ProfilePhoto = ({ imageUrl, size = '150px', borderColor = colors.white, bo
         right: '10px',
         zIndex: '20',     // Asegura que el botón esté por encima de la imagen
       }}>
+        
         
       </div>
     </div>

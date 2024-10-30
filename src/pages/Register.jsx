@@ -1,20 +1,16 @@
 // Register.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import Card from '../components/Card';
-import InputField from '../components/InputField';
-import Button from '../components/Button';
-import Title from '../components/Title';
-import Text from '../components/Text';
+import Button from '../components/common/Button';
 import { Link, useNavigate } from 'react-router-dom';
-import colors from '../components/Colors';
+import colors from '../assets/Colors';
 import axios from 'axios';
-import Loader from '../components/Loader';
-import ProfilePhoto from '../components/ProfilePhoto';
-import AddButton from '../components/AddButton';
-import FeedbackModal from '../components/FeedbackModal';
+import Loader from '../components/common/Loader';
+import ProfilePhoto from '../components/common/ProfilePhoto';
+import FeedbackModal from '../components/common/FeedbackModal';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { CardContainer, FormLogin, Input, InputContainer, LinkStyle, PasswordConatiner, StyledAddButton, Text, Title } from '../components/common/CommonStyles';
 
 const Register = () => {
   const [steps, setSteps] = useState(1); // Variable para controlar los pasos
@@ -286,15 +282,15 @@ const Register = () => {
         />
       )}
 
-      <Card>
+      <CardContainer>
         {steps === 1 && (
         <>
         <Title>Regístrate</Title>
-        <form onSubmit={handleSubmit}>
+        <FormLogin onSubmit={handleSubmit}>
           
           <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', gap: '10px' }}>
             <div style={{ display: 'flex', flexDirection: 'row'}}>
-              <InputField 
+              <Input 
                 type="text" 
                 placeholder="Nombre" 
                 value={name} 
@@ -303,7 +299,7 @@ const Register = () => {
               {nameError && <small style={{ color: colors.third }}>{nameError}</small>}
             </div >
             <div style={{ display: 'flex'}}>
-              <InputField 
+              <Input 
                 type="text" 
                 placeholder="Apellidos" 
                 value={surName} 
@@ -313,38 +309,38 @@ const Register = () => {
             </div>
           </div>
 
-          <div>
-            <InputField 
+          <InputContainer>
+            <Input 
               type="text" 
               placeholder="ID de la Universidad" 
               value={universityId} 
               onChange={(e) => setUniversityId(e.target.value)} 
             />
             {universityIdError && <small style={{ color: colors.third }}>{universityIdError}</small>}
-          </div>
+          </InputContainer>
 
-          <div>
-            <InputField 
+          <InputContainer>
+            <Input 
               type="email" 
               placeholder="Correo Electrónico" 
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
             />
             {emailError && <small style={{ color: colors.third }}>{emailError}</small>}
-          </div>
+          </InputContainer>
 
-          <div>
-            <InputField 
+          <InputContainer>
+            <Input 
               type="tel" 
               placeholder="Teléfono" 
               value={phoneNumber} 
               onChange={(e) => setPhoneNumber(e.target.value)} 
             />
             {phoneNumberError && <small style={{ color: colors.third }}>{phoneNumberError}</small>}
-          </div>
+          </InputContainer>
 
-          <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
-            <InputField 
+          <PasswordConatiner>
+            <Input 
               type={showPassword ? 'text' : 'password'} 
               placeholder="Contraseña" 
               value={password} 
@@ -367,18 +363,18 @@ const Register = () => {
             >
               <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} size="lg" />
             </button>
-          </div>
+          </PasswordConatiner>
           {passwordError && <small style={{ color: colors.third }}>{passwordError}</small>}
 
           <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
            <Button type="submit" label="Registrarse" primary disabled={isButtonDisabled} onClick={handleNextStep} />
          </div>
 
-        </form>
+        </FormLogin>
 
         <Text>
           ¿Ya tienes una cuenta?  
-          <Link to="/iniciar-sesion" style={{ color: colors.third, textDecoration: 'none' }}> Inicia sesión</Link>
+          <LinkStyle onClick={() => navigate('/iniciar-sesion')}> Inicia sesión</LinkStyle>
         </Text>
       </>
         )}
@@ -386,7 +382,7 @@ const Register = () => {
         {steps === 2 && ( // Paso 2: Agregar foto de perfil y registrar
           <>
             <Title>Agrega tu foto</Title>
-            <form onSubmit={handleSubmit}>
+            <FormLogin onSubmit={handleSubmit}>
               <div style={profileContainerStyle}>
                 <ProfilePhoto
                   imageUrl={imagePreviewUrl}
@@ -411,15 +407,15 @@ const Register = () => {
                       cursor: 'pointer',
                     }}
                   >
-                    <AddButton />
+                    <StyledAddButton>+</StyledAddButton>
                   </button>
                 </div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%',marginBottom:'20px' }}>
                 <Button onClick={handlePreviousStep} label="Anterior" />
                 <Button type="submit" label="¡Listo!" primary />
               </div>
-            </form>
+            </FormLogin>
           </>
         )}
 
@@ -466,7 +462,7 @@ const Register = () => {
             </div>
           </>
         )}
-      </Card>
+      </CardContainer>
     </div>
   );
 };

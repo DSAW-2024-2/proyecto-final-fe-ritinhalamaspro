@@ -1,0 +1,10 @@
+.main-content{
+    display: flex;
+    flex-direction: row;
+    overflow-x: hidden;
+    width: 100%;
+    position:fixed;
+    @media (max-width:768px){
+        flex-direction: column-reverse;
+    }
+}

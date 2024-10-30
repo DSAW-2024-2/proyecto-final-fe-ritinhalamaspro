@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import Card from '../components/Card';
-import InputField from '../components/InputField';
-import Button from '../components/Button';
-import Title from '../components/Title';
-import Text from '../components/Text';
+import Button from '../components/common/Button';
 import { Link, useNavigate } from 'react-router-dom';
-import colors from '../components/Colors'; // Importamos el archivo de colores
+import colors from '../assets/Colors'; // Importamos el archivo de colores
 import axios from 'axios';
-import Loader from '../components/Loader'; // Importa el componente Loader
-import FeedbackModal from '../components/FeedbackModal'; // Importa el modal de feedback
+import Loader from '../components/common/Loader'; // Importa el componente Loader
+import FeedbackModal from '../components/common/FeedbackModal'; // Importa el modal de feedback
 
 // Importamos los íconos de FontAwesome
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { CardContainer, Container, FormLogin, Input, LinkStyle, PasswordConatiner, Text, Title, TogglePasswordButton } from '../components/common/CommonStyles';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -46,17 +43,9 @@ const Login = () => {
     color: colors.white, // Usamos la variable de color para el encabezado
   };
 
-  const linkStyle = {
-    color: colors.third, // Usamos la variable de color para el enlace
-    textDecoration: 'underline',
-    cursor: 'pointer',
-  };
+  
 
-  const formStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  };
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -88,7 +77,7 @@ const Login = () => {
         console.log('Usuario autenticado correctamente');
         // Guardar el token en el localStorage
         localStorage.setItem('token', response.data.token);
-        navigate('/pagina-principal');
+        navigate('/home');
       } else {
         // Si las credenciales son incorrectas, mostramos el modal
         setModalMessage('Credenciales incorrectas');
@@ -108,8 +97,8 @@ const Login = () => {
   const isFormValid = email && password;
 
   return (
-    <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      {loading && (
+    <Container>
+       {loading && (
         <div style={{
           position: 'absolute',
           top: 0,
@@ -125,10 +114,10 @@ const Login = () => {
           <Loader />
         </div>
       )}
-      <Card>
-        <Title style={headingStyle}>Inicia Sesión</Title>
-        <form style={formStyle} onSubmit={handleLogin}>
-          <InputField
+      <CardContainer>
+        <Title>Inicia Sesión</Title>
+        <FormLogin onSubmit={handleLogin}>
+          <Input
             type="email"
             placeholder="Correo electrónico"
             value={email}
@@ -137,43 +126,32 @@ const Login = () => {
           />
           {errorEmail && <div style={{ color: 'red', fontSize: '12px', alignSelf: 'flex-start', marginTop: '5px' }}>{errorEmail}</div>}
           
-          <div style={{ position: 'relative', width: '100%' }}>
-            <InputField
+          <PasswordConatiner >
+            <Input
               type={showPassword ? 'text' : 'password'} // Cambia el tipo según el estado
               placeholder="Contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <button
-              type="button"
+            <TogglePasswordButton
               onClick={() => setShowPassword(!showPassword)} // Alterna entre mostrar u ocultar la contraseña
-              style={{
-                position: 'absolute',
-                right: '10px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'white'
-              }}
             >
               <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} /> {/* Ícono de ojo */}
-            </button>
-          </div>
+            </TogglePasswordButton>
+          </PasswordConatiner>
           {errorPassword && <div style={{ color: 'red', fontSize: '12px', alignSelf: 'flex-start', marginTop: '5px' }}>{errorPassword}</div>}
           
-          <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+          <div>
             <Button type="submit" label="Iniciar Sesión" primary disabled={!isFormValid} /> {/* Deshabilitar si el formulario no es válido */}
           </div>
-        </form>
+        </FormLogin>
         <Text style={{ marginTop: '20px', color: colors.white }}>
           ¿No tienes una cuenta? 
           <br />
-          <Link to="/registrarse" style={linkStyle}>Regístrate</Link>
+          <LinkStyle onClick={() => navigate('/registrarse')} >Regístrate</LinkStyle>
         </Text>
-      </Card>
+      </CardContainer>
 
       {/* Modal de feedback */}
       {showModal && (
@@ -184,7 +162,7 @@ const Login = () => {
           onClose={() => setShowModal(false)} 
         />
       )}
-    </div>
+    </Container>
   );
 };
 

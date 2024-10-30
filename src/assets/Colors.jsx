@@ -1,4 +1,4 @@
-const colors = {
+const Colors = {
   
     primary: '#3A4BE0',
     primaryHover: '#4050e5',
@@ -9,4 +9,4 @@ const colors = {
 
 };
 
-export default colors;
+export default Colors;

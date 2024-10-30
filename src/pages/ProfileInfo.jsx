@@ -1,13 +1,10 @@
 // ProfileInfo.jsx
 import React, { useState, useEffect } from 'react';
-import Card from '../components/Card';
-import Button from '../components/Button';
-import Title from '../components/Title';
-import Text from '../components/Text';
-import ProfilePhoto from '../components/ProfilePhoto';
-import AddButton from '../components/AddButton';
+import Button from '../components/common/Button';
+import ProfilePhoto from '../components/common/ProfilePhoto';
 import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate para redireccionar
-import Loader from '../components/Loader'; // Importa el componente Loader
+import Loader from '../components/common/Loader'; // Importa el componente Loader
+import { CardContainer, Container, FormLogin, PasswordConatiner, StyledWrapper, Text, Title } from '../components/common/CommonStyles';
 
 const ProfileInfo = () => {
   const navigate = useNavigate(); // Hook para redirigir
@@ -15,6 +12,7 @@ const ProfileInfo = () => {
   useEffect(() => {
     // Verificar si el usuario ya está autenticado
     const token = localStorage.getItem('token');
+    console.log(token)
     if (!token) {
       navigate('/');
     }
@@ -148,8 +146,8 @@ const ProfileInfo = () => {
   }
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <Card style={{ position: 'relative', paddingTop: '80px' }}>
+    <Container>
+      <CardContainer style={{ position: 'relative', paddingTop: '80px' }}>
         <div style={profilePhotoContainerStyle}>
           <ProfilePhoto
             imageUrl={image ? image : 'src/assets/ProfilePhoto.png'} // Usa 'ProfilePhoto.png' en lugar de 'PofilePhoto.png'
@@ -161,7 +159,7 @@ const ProfileInfo = () => {
             ? `${capitalizeFirstLetter(profileData.name)} ${capitalizeFirstLetter(profileData.surName)}`
             : 'Nombre no disponible'}
         </Title>
-        <form>
+        <FormLogin>
           <div style={profileContainerStyle}>
             <div style={addButtonContainerStyle}>
               <label htmlFor="imageUpload">
@@ -181,13 +179,20 @@ const ProfileInfo = () => {
           <Text>Correo: {profileData.email ? profileData.email : 'Correo no disponible'}</Text>
           <Text>Teléfono: {profileData.phoneNumber ? profileData.phoneNumber : 'Teléfono no disponible'}</Text>
           {/* Puedes eliminar la etiqueta <img> si ya estás usando el componente ProfilePhoto */}
-          {/* <img src={image} alt="Profile" /> */}
-        </form>
+          <img src={image} alt="Profile" />
+        </FormLogin>
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
           <Button label="Cerrar Sesión" primary onClick={handleLogout} />
         </div>
-      </Card>
-    </div>
+      </CardContainer>
+      <StyledWrapper>
+      <label htmlFor="filter" className="switch" aria-label="Toggle Filter">
+        <input type="checkbox" id="filter" />
+        <span>Pasajero</span>
+        <span>Carro</span>
+      </label>
+    </StyledWrapper>
+    </Container>
   );
 };
 

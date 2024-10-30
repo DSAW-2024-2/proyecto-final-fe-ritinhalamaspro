@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Importar useNavigate
-import Card from '../components/Card';
-import InputField from '../components/InputField';
-import Button from '../components/Button';
-import Title from '../components/Title';
-import Loader from '../components/Loader'; // Importa tu componente Loader
-import colors from '../components/Colors';
-import AddPhoto from '../components/AddPhoto'; // Importa el componente AddPhoto
+import Button from '../components/common/Button';
+import Loader from '../components/common/Loader'; // Importa tu componente Loader
+import colors from '../assets/Colors';
+import AddPhoto from '../components/common/AddPhoto'; // Importa el componente AddPhoto
 import axios from 'axios';
+import { CardContainer, FormLogin, Input, InputContainer, Title } from '../components/common/CommonStyles';
 
 const RegisterCar = () => {
   const [currentStep, setCurrentStep] = useState(1); // Controla los pasos del formulario
@@ -114,15 +112,15 @@ const RegisterCar = () => {
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <Card>
+      <CardContainer>
         {currentStep === 1 && (
           <>
             <Title>¡Registra <span style={{ color: colors.third }}><strong>tu carro</strong></span>!</Title>
 
             {/* Formulario para registrar los detalles del carro */}
-            <form onSubmit={handleNextStep}>
-              <div>
-                <InputField 
+            <FormLogin onSubmit={handleNextStep}>
+              <InputContainer>
+                <Input
                   type="text" 
                   placeholder="Placa" 
                   value={plate} 
@@ -133,10 +131,10 @@ const RegisterCar = () => {
                   error={plateError}
                 />
                 {plateError && <small style={{ color: colors.third }}>{plateError}</small>}
-              </div>
+              </InputContainer>
 
-              <div>
-                <InputField 
+              <InputContainer>
+                <Input 
                   type="text" 
                   placeholder="Capacidad Vehículo" 
                   value={capacity} 
@@ -146,30 +144,30 @@ const RegisterCar = () => {
                   error={capacityError}
                 />
                 {capacityError && <small style={{ color: colors.third }}>{capacityError}</small>}
-              </div>
+              </InputContainer>
 
-              <div>
-                <InputField 
+              <InputContainer>
+                <Input 
                   type="text" 
                   placeholder="Marca" 
                   value={brand} 
                   onChange={(e) => setBrand(e.target.value)} 
                 />
-              </div>
+              </InputContainer>
 
-              <div>
-                <InputField 
+              <InputContainer>
+                <Input 
                   type="text" 
                   placeholder="Modelo" 
                   value={model} 
                   onChange={(e) => setModel(e.target.value)} 
                 />
-              </div>
+              </InputContainer>
 
-              <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginBottom:'20px' }}>
                 <Button type="submit" label="Siguiente" primary disabled={!isStep1Filled} />
               </div>
-            </form>
+            </FormLogin>
           </>
         )}
 
@@ -178,18 +176,18 @@ const RegisterCar = () => {
             <Title>¡Agrega una foto de <span style={{ color: colors.third }}><strong>tu Carro</strong></span>!</Title>
 
             {/* Formulario para agregar la foto del carro */}
-            <form>
+            <FormLogin>
               <AddPhoto
                 label="Agregar foto del carro"
                 onPhotoChange={setCarPhoto}
                 photo={carPhoto} // Pasamos la foto seleccionada
               />
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom:'20px'}}>
                 <Button onClick={handlePreviousStep} label="Anterior" />
                 <Button onClick={handleNextStep} label="Siguiente" primary disabled={!carPhoto} />
               </div>
-            </form>
+            </FormLogin>
           </>
         )}
 
@@ -198,18 +196,18 @@ const RegisterCar = () => {
             <Title>¡Agrega una foto de <span style={{ color: colors.third }}><strong>tu SOAT vigente</strong></span>!</Title>
 
             {/* Formulario para agregar la foto del SOAT */}
-            <form onSubmit={handleSubmit}>
+            <FormLogin onSubmit={handleSubmit}>
               <AddPhoto
                 label="Agregar foto del SOAT"
                 onPhotoChange={setSoatPhoto}
                 photo={soatPhoto} // Pasamos la foto seleccionada
               />
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%',marginBottom:'20px' }}>
                 <Button onClick={handlePreviousStep} label="Anterior" />
                 <Button type="submit" label="¡Listo!" primary disabled={!soatPhoto} />
               </div>
-            </form>
+            </FormLogin>
           </>
         )}
 
@@ -218,7 +216,7 @@ const RegisterCar = () => {
             <Loader />
           </div>
         )}
-      </Card>
+      </CardContainer>
     </div>
   );
 };
