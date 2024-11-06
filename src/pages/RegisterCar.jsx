@@ -5,7 +5,7 @@ import Loader from '../components/common/Loader'; // Importa tu componente Loade
 import colors from '../assets/Colors';
 import AddPhoto from '../components/common/AddPhoto'; // Importa el componente AddPhoto
 import axios from 'axios';
-import { CardContainer, FormLogin, Input, InputContainer, Title } from '../components/common/CommonStyles';
+import { CardContainer, Container, FormLogin, Input, InputContainer, Title } from '../components/common/CommonStyles';
 
 const RegisterCar = () => {
   const [currentStep, setCurrentStep] = useState(1); // Controla los pasos del formulario
@@ -111,8 +111,8 @@ const RegisterCar = () => {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <CardContainer>
+<Container>  
+     <CardContainer>
         {currentStep === 1 && (
           <>
             <Title>¡Registra <span style={{ color: colors.third }}><strong>tu carro</strong></span>!</Title>
@@ -217,8 +217,7 @@ const RegisterCar = () => {
           </div>
         )}
       </CardContainer>
-    </div>
-  );
+      </Container>   );
 };
 
 export default RegisterCar;

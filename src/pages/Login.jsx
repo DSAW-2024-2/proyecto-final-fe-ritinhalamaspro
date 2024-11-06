@@ -9,7 +9,7 @@ import FeedbackModal from '../components/common/FeedbackModal'; // Importa el mo
 // Importamos los íconos de FontAwesome
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import { CardContainer, Container, FormLogin, Input, LinkStyle, PasswordConatiner, Text, Title, TogglePasswordButton } from '../components/common/CommonStyles';
+import { CardContainer, Container, FormLogin, Input, InputContainer, LinkStyle, PasswordConatiner, Text, Title, TogglePasswordButton } from '../components/common/CommonStyles';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -117,15 +117,16 @@ const Login = () => {
       <CardContainer>
         <Title>Inicia Sesión</Title>
         <FormLogin onSubmit={handleLogin}>
-          <Input
-            type="email"
-            placeholder="Correo electrónico"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          {errorEmail && <div style={{ color: 'red', fontSize: '12px', alignSelf: 'flex-start', marginTop: '5px' }}>{errorEmail}</div>}
-          
+          <InputContainer>
+            <Input
+              type="email"
+              placeholder="Correo electrónico"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            {errorEmail && <div style={{ color: 'red', fontSize: '12px', alignSelf: 'flex-start', marginTop: '5px' }}>{errorEmail}</div>}
+          </InputContainer>
           <PasswordConatiner >
             <Input
               type={showPassword ? 'text' : 'password'} // Cambia el tipo según el estado

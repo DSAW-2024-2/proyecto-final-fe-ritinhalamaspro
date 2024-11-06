@@ -10,7 +10,7 @@ import FeedbackModal from '../components/common/FeedbackModal';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import { CardContainer, FormLogin, Input, InputContainer, LinkStyle, PasswordConatiner, StyledAddButton, Text, Title } from '../components/common/CommonStyles';
+import { CardContainer, Container, FormLogin, Input, InputContainer, LinkStyle, PasswordConatiner, StyledAddButton, Text, Title } from '../components/common/CommonStyles';
 
 const Register = () => {
   const [steps, setSteps] = useState(1); // Variable para controlar los pasos
@@ -255,8 +255,10 @@ const Register = () => {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      {loading && (
+
+<Container>
+
+   {loading && (
         <div style={{
           position: 'absolute',
           top: 0,
@@ -361,7 +363,7 @@ const Register = () => {
                 color: 'white'
               }}
             >
-              <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} size="lg" />
+              <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash}  />
             </button>
           </PasswordConatiner>
           {passwordError && <small style={{ color: colors.third }}>{passwordError}</small>}
@@ -463,7 +465,7 @@ const Register = () => {
           </>
         )}
       </CardContainer>
-    </div>
+      </Container> 
   );
 };
 

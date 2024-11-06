@@ -1,197 +1,301 @@
-// ProfileInfo.jsx
 import React, { useState, useEffect } from 'react';
-import Button from '../components/common/Button';
+import { useNavigate } from 'react-router-dom';
+import { AiOutlineLogout, AiOutlineEdit, AiOutlineDelete } from 'react-icons/ai';
 import ProfilePhoto from '../components/common/ProfilePhoto';
-import { useNavigate } from 'react-router-dom'; // Importa el hook useNavigate para redireccionar
-import Loader from '../components/common/Loader'; // Importa el componente Loader
-import { CardContainer, Container, FormLogin, PasswordConatiner, StyledWrapper, Text, Title } from '../components/common/CommonStyles';
+import Loader from '../components/common/Loader';
+import FeedbackModal from '../components/common/FeedbackModal';
+import Button from '../components/common/Button';
+import { Container, Text, Title, StyledWrapper, StyledAddButton, Input } from '../components/common/CommonStyles';
+import Colors from '../assets/Colors';
 
 const ProfileInfo = () => {
-  const navigate = useNavigate(); // Hook para redirigir
-
-  useEffect(() => {
-    // Verificar si el usuario ya está autenticado
-    const token = localStorage.getItem('token');
-    console.log(token)
-    if (!token) {
-      navigate('/');
-    }
-  }
-  , []);
-
+  const navigate = useNavigate();
+  
+  const [isPassenger, setIsPassenger] = useState(true);
   const [profileData, setProfileData] = useState(null);
   const [image, setImage] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true); // Estado para manejar la carga
-
-  const capitalizeFirstLetter = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-  };
+  const [loading, setLoading] = useState(true);
+  const [showQuestionModal, setShowQuestionModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editableData, setEditableData] = useState({});
 
   useEffect(() => {
-    const token = localStorage.getItem('token'); // Obtener el token del localStorage
-    if (token) {
-      setIsLoggedIn(true);
-      fetchProfileData(token); // Pasar el token para obtener los datos del perfil
-    } else {
-      setIsLoggedIn(false);
-      setLoading(false); // Detener el estado de carga si no hay token
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/');
     }
   }, []);
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+      fetchProfileData(token);
+    } else {
+      setIsLoggedIn(false);
+      setLoading(false);
+    }
+  }, [isPassenger]);
+
   const fetchProfileData = async (token) => {
     try {
-      const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/users/me', {
+      setLoading(true);
+      const endpoint = isPassenger
+        ? 'https://proyecto-final-be-ritinhalamaspro.vercel.app/users/me'
+        : 'https://proyecto-final-be-ritinhalamaspro.vercel.app/cars/me';
+      
+      const response = await fetch(endpoint, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`, // Añadir el token en el header
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
       });
 
-      if (!response.ok) {
-        throw new Error('Error al obtener los datos del perfil');
+      if (!response.ok) throw new Error('Error al obtener los datos del perfil');
+      
+      let data = await response.json();
+
+      if (!isPassenger) {
+        data = Object.values(data)[0];
       }
 
-      const data = await response.json();
-      console.log("URL de la imagen:", data.photoURL); // Verifica que la URL esté presente y sea correcta
-
       setProfileData(data);
-      console.log("Respuesta completa del perfil:", data);
-      setImage(data.photoURL); // Usar 'photoURL' en lugar de 'photo'
-      console.log('Imagen actual:', data.photoURL); // Imprime el valor correcto
-
-      setLoading(false); // Detener el estado de carga después de obtener los datos
+      setEditableData({
+        name: data.name || '',
+        surName: data.surName || '',
+        universityID: data.universityID || '',
+        email: data.email || '',
+        phoneNumber: data.phoneNumber || ''
+      });
+      setImage(data.photoURL || data.carPhotoURL);
+      setLoading(false);
     } catch (error) {
       console.error('Error:', error);
-      setLoading(false); // Detener el estado de carga en caso de error
+      setLoading(false);
     }
   };
 
-  // Función para cerrar sesión
   const handleLogout = async () => {
     try {
-      // Hacer la solicitud POST para cerrar sesión
       await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/logout', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`, // Enviar el token en los headers
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
       });
-
-      // Eliminar el token del localStorage
       localStorage.removeItem('token');
-
-      // Redirigir al usuario a la página de inicio de sesión
       navigate('/iniciar-sesion');
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     }
   };
 
-  const profileContainerStyle = {
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    marginBottom: '20px',
+  const confirmLogout = () => {
+    setShowQuestionModal(true);
   };
 
-  const addButtonContainerStyle = {
-    position: 'absolute',
-    top: '-40px',
-    left: '-40px',
-    cursor: 'pointer',
+  const closeModal = () => {
+    setShowQuestionModal(false);
   };
 
-  const profilePhotoContainerStyle = {
-    position: 'absolute',
-    top: '-55px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    zIndex: '1',
+  const togglePassenger = () => {
+    setIsPassenger((prev) => !prev);
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result); // Actualiza la imagen de perfil con la seleccionada
-        // Opcional: Puedes enviar la nueva imagen al backend aquí si lo deseas
-      };
-      reader.readAsDataURL(file);
+  const handleEditProfile = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleSaveEdit = async () => {
+    setIsEditing(false);
+    setShowQuestionModal(false);
+    const token = localStorage.getItem('token');
+
+    try {
+      await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/users/me', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(editableData)
+      });
+
+      fetchProfileData(token);
+    } catch (error) {
+      console.error('Error al guardar los cambios:', error);
     }
   };
 
-  // Si el usuario no está logueado
+  const handleDeleteCar = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/cars/me', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) throw new Error('Error al eliminar el carro');
+      
+      setIsPassenger(true);
+      setShowDeleteModal(false);
+      fetchProfileData(token);
+    } catch (error) {
+      console.error('Error al eliminar el carro:', error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setEditableData({ ...editableData, [e.target.name]: e.target.value });
+  };
+
   if (!isLoggedIn && !loading) {
     return <div>Por favor inicia sesión para ver tu perfil.</div>;
   }
 
-  // Mostrar el estado de carga mientras se obtiene la información
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Loader /> {/* Reemplaza el texto "Cargando..." con el componente Loader */}
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: Colors.background }}>
+        <Loader />
       </div>
     );
   }
 
-  // Verificación adicional para evitar el error de nulos
-  if (!profileData) {
-    return <div>No se pudieron cargar los datos del perfil.</div>;
-  }
-
   return (
     <Container>
-      <CardContainer style={{ position: 'relative', paddingTop: '80px' }}>
-        <div style={profilePhotoContainerStyle}>
-          <ProfilePhoto
-            imageUrl={image ? image : 'src/assets/ProfilePhoto.png'} // Usa 'ProfilePhoto.png' en lugar de 'PofilePhoto.png'
-            size="170px"
-          />
+      <div style={{
+        position: 'relative',
+        backgroundColor: Colors.background,
+        width: '350px',
+        padding: '30px 40px',
+        borderRadius: '15px',
+        boxShadow: '0px 11px 5px rgba(0, 0, 0, 0.5)',
+        textAlign: 'center',
+        color: Colors.white,
+        marginTop: '20px',
+      }}>
+        <div style={{ position: 'absolute', top: '-150px', left: '50%', transform: 'translateX(-50%)' }}>
+          <ProfilePhoto imageUrl={image ? image : 'src/assets/ProfilePhoto.png'} size="120px" />
         </div>
-        <Title>
-          {profileData.name && profileData.surName
-            ? `${capitalizeFirstLetter(profileData.name)} ${capitalizeFirstLetter(profileData.surName)}`
-            : 'Nombre no disponible'}
-        </Title>
-        <FormLogin>
-          <div style={profileContainerStyle}>
-            <div style={addButtonContainerStyle}>
-              <label htmlFor="imageUpload">
-                {/* Puedes agregar un botón o icono aquí si deseas */}
-              </label>
-              <input
-                type="file"
-                id="imageUpload"
-                style={{ display: 'none' }}
-                onChange={handleImageUpload}
-                accept="image/*"
-              />
-             
-            </div>
+
+        {isPassenger && !isEditing && (
+          <StyledAddButton 
+            onClick={handleEditProfile}
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+            }}
+          >
+            <AiOutlineEdit size={16} />
+          </StyledAddButton>
+        )}
+
+        {!isPassenger && profileData.plate && (
+          <StyledAddButton 
+            onClick={() => setShowDeleteModal(true)}
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+            }}
+          >
+            <AiOutlineDelete size={16} />
+          </StyledAddButton>
+        )}
+
+        {!isEditing && isPassenger && (
+          <div style={{ marginTop: '60px' }}>
+            <Title>
+              {`${profileData.name || 'Nombre no disponible'} ${profileData.surName || ''}`}
+            </Title>
           </div>
-          <Text>ID: {profileData.universityID ? profileData.universityID : 'ID no disponible'}</Text>
-          <Text>Correo: {profileData.email ? profileData.email : 'Correo no disponible'}</Text>
-          <Text>Teléfono: {profileData.phoneNumber ? profileData.phoneNumber : 'Teléfono no disponible'}</Text>
-          {/* Puedes eliminar la etiqueta <img> si ya estás usando el componente ProfilePhoto */}
-          <img src={image} alt="Profile" />
-        </FormLogin>
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-          <Button label="Cerrar Sesión" primary onClick={handleLogout} />
-        </div>
-      </CardContainer>
+        )}
+
+        {isPassenger ? (
+          <div style={{ textAlign: 'left', padding: '10px 0', marginTop:'40px'}}>
+            {isEditing ? (
+              <>
+                <Input name="name" value={editableData.name} onChange={handleInputChange} placeholder="Nombre" style={{ marginBottom: '10px' }} />
+                <Input name="surName" value={editableData.surName} onChange={handleInputChange} placeholder="Apellido" style={{ marginBottom: '10px' }} />
+                <Input name="universityID" value={editableData.universityID} onChange={handleInputChange} placeholder="ID Universidad" style={{ marginBottom: '10px' }} />
+                <Input name="email" value={editableData.email} onChange={handleInputChange} placeholder="Correo Electrónico" style={{ marginBottom: '10px' }} />
+                <Input name="phoneNumber" value={editableData.phoneNumber} onChange={handleInputChange} placeholder="Teléfono" style={{ marginBottom: '10px' }} />
+                <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                  <Button label="Cancelar" secondary onClick={handleCancelEdit} />
+                  <Button label="Guardar" primary onClick={() => setShowQuestionModal(true)} />
+                </div>
+              </>
+            ) : (
+              <>
+                <Text>ID Universidad: {profileData.universityID || 'ID no disponible'}</Text>
+                <Text>Correo Electrónico: {profileData.email || 'Correo no disponible'}</Text>
+                <Text>Teléfono: {profileData.phoneNumber || 'Teléfono no disponible'}</Text>
+              </>
+            )}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'left', padding: '10px 0', color: Colors.details }}>
+            {profileData.plate ? (
+              <>
+                <Text>Capacidad del vehículo: {profileData.capacity || 'Capacidad no disponible'}</Text>
+                <Text>Marca: {profileData.brand || 'Marca no disponible'}</Text>
+                <Text>Modelo: {profileData.model || 'Modelo no disponible'}</Text>
+              </>
+            ) : (
+              <div style={{ textAlign: 'center', color: Colors.third, padding: '20px' }}>
+                <Text>No tienes un carro registrado.</Text>
+                <Button label="Registrar Carro" primary onClick={() => navigate('/registrar-carro')} style={{ marginTop: '10px' }} />
+              </div>
+            )}
+          </div>
+        )}
+
+        {!isEditing && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px', cursor: 'pointer' }} onClick={confirmLogout}>
+            <AiOutlineLogout size={30} color={Colors.primary} />
+            <Text style={{ marginTop: '5px', fontSize: '12px', color: Colors.details }}>Cerrar Sesión</Text>
+          </div>
+        )}
+      </div>
+
+      {showQuestionModal && (
+        <FeedbackModal
+          type="question"
+          message="¿Está seguro de querer realizar esta operación?"
+          details="Esta acción es irreversible."
+          onClose={() => setShowQuestionModal(false)}
+          onConfirm={handleSaveEdit}
+        />
+      )}
+
+      {showDeleteModal && (
+        <FeedbackModal
+          type="question"
+          message="¿Está seguro de que desea eliminar este carro?"
+          details="Esta acción no se puede deshacer."
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDeleteCar}
+        />
+      )}
+      
       <StyledWrapper>
-      <label htmlFor="filter" className="switch" aria-label="Toggle Filter">
-        <input type="checkbox" id="filter" />
-        <span>Pasajero</span>
-        <span>Carro</span>
-      </label>
-    </StyledWrapper>
+        <label className="switch" aria-label="Toggle Passenger/Car">
+          <input type="checkbox" checked={!isPassenger} onChange={togglePassenger} />
+          <span>Pasajero</span>
+          <span>Carro</span>
+        </label>
+      </StyledWrapper>
     </Container>
   );
 };

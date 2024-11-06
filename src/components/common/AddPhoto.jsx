@@ -36,7 +36,7 @@ const AddPhoto = ({ label, onPhotoChange }) => {
     height: '100%',
     objectFit: 'cover', // Para que la imagen encaje en el contenedor
     borderRadius: '10px',
-    zIndex: '-1', // Asegura que la imagen esté por encima del ícono
+    overflow:'hidden', // Asegura que la imagen esté por encima del ícono
   };
 
   // Estilos del input para ocultarlo

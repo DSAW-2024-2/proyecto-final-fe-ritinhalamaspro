@@ -1,11 +1,10 @@
 // src/components/CommonStyles.js
 import styled from 'styled-components';
-import { useTheme } from '../../ThemeContext';
-
+import colors from '../../assets/Colors';
 
 export const Text = styled.p`
   text-align: center;
-  margin-top: 20px;
+  margin: 20px;
   color: ${colors.white};
 `;
 
@@ -40,6 +39,7 @@ export const Input = styled.input`
   border: 1px solid ${(props) => (props.isFocused ? colors.third : '#898A8D')};
   box-shadow: ${(props) => (props.isFocused ? `0 0 5px ${colors.third}` : 'none')};
   transition: border 0.3s ease, box-shadow 0.3s ease;
+
 `;
 
 export const CardContainer = styled.div`
@@ -82,6 +82,7 @@ export const PasswordConatiner = styled.div`
   position: relative;
    width: 100%;
    display:flex;
+
 `;
 
 export const InputContainer = styled.div`
@@ -133,25 +134,19 @@ export const Container =styled.div`
   height: 100vh;
   background-color: ${colors.background};
   overflow: hidden;
-
-
 `;
+
 
 export const StyledWrapper = styled.div`
   .switch {
-    --_switch-bg-clr:${colors.details} ;
-    --_switch-padding: 4px; /* padding around button*/
-    --_slider-bg-clr: ${colors.primary}; /* slider color unchecked */
-    --_slider-bg-clr-on:  ${colors.primary}; /* slider color checked */
+    --_switch-bg-clr: ${colors.details};
+    --_switch-padding: 2px; /* padding alrededor del botón */
+    --_slider-bg-clr: ${colors.primary}; /* color del slider no activado */
+    --_slider-bg-clr-on: ${colors.primary}; /* color del slider activado */
     --_slider-txt-clr: #ffffff;
-    --_label-padding: 1rem 2rem; /* padding around the labels -  this gives the switch it's global width and height */
-    --_switch-easing: cubic-bezier(
-      0.47,
-      1.64,
-      0.41,
-      0.8
-    ); /* easing on toggle switch */
-    color: #5c1111;
+    --_label-padding: 0.5rem 1rem; /* reduce el tamaño global del switch */
+    --_switch-easing: cubic-bezier(0.47, 1.64, 0.41, 0.8); /* easing para el cambio */
+    color: ${colors.white};
     width: fit-content;
     display: flex;
     justify-content: center;
@@ -160,8 +155,8 @@ export const StyledWrapper = styled.div`
     cursor: pointer;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    position: relative;
     isolation: isolate;
+    margin:20px;
   }
 
   .switch input[type="checkbox"] {
@@ -175,12 +170,14 @@ export const StyledWrapper = styled.div`
     white-space: nowrap;
     border-width: 0;
   }
+  
   .switch > span {
     display: grid;
     place-content: center;
     transition: opacity 300ms ease-in-out 150ms;
     padding: var(--_label-padding);
   }
+  
   .switch::before,
   .switch::after {
     content: "";
@@ -188,55 +185,57 @@ export const StyledWrapper = styled.div`
     border-radius: inherit;
     transition: inset 150ms ease-in-out;
   }
+  
   /* switch slider */
   .switch::before {
     background-color: var(--_slider-bg-clr);
-    inset: var(--_switch-padding) 50% var(--_switch-padding)
-      var(--_switch-padding);
-    transition:
-      inset 500ms var(--_switch-easing),
-      background-color 500ms ease-in-out;
+    inset: var(--_switch-padding) 50% var(--_switch-padding) var(--_switch-padding);
+    transition: inset 500ms var(--_switch-easing), background-color 500ms ease-in-out;
     z-index: -1;
-    box-shadow:
-      inset 0 1px 1px rgba(0, 0, 0, 0.3),
-      0 1px rgba(255, 255, 255, 0.3);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.3);
   }
+  
   /* switch bg color */
   .switch::after {
     background-color: var(--_switch-bg-clr);
     inset: 0;
     z-index: -2;
   }
+  
   /* switch hover & focus */
   .switch:focus-within::after {
-    inset: -0.25rem;
+    inset: -0.15rem;
   }
+  
   .switch:has(input:checked):hover > span:first-of-type,
   .switch:has(input:not(:checked)):hover > span:last-of-type {
     opacity: 1;
     transition-delay: 0ms;
     transition-duration: 100ms;
   }
+  
   /* switch hover */
   .switch:has(input:checked):hover::before {
-    inset: var(--_switch-padding) var(--_switch-padding) var(--_switch-padding)
-      45%;
+    inset: var(--_switch-padding) var(--_switch-padding) var(--_switch-padding) 45%;
   }
+  
   .switch:has(input:not(:checked)):hover::before {
-    inset: var(--_switch-padding) 45% var(--_switch-padding)
-      var(--_switch-padding);
+    inset: var(--_switch-padding) 45% var(--_switch-padding) var(--_switch-padding);
   }
+  
   /* checked - move slider to right */
   .switch:has(input:checked)::before {
     background-color: var(--_slider-bg-clr-on);
-    inset: var(--_switch-padding) var(--_switch-padding) var(--_switch-padding)
-      50%;
+    inset: var(--_switch-padding) var(--_switch-padding) var(--_switch-padding) 50%;
   }
+  
   /* checked - set opacity */
   .switch > span:last-of-type,
   .switch > input:checked + span:first-of-type {
     opacity: 0.75;
   }
+  
   .switch > input:checked ~ span:last-of-type {
     opacity: 1;
-  }`;
+  }
+`;
