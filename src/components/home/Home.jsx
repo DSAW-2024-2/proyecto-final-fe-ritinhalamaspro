@@ -1,127 +1,321 @@
+// src/pages/HomePage/HomePage.jsx
 import React, { useState, useEffect } from 'react';
-import { AiOutlineUser, AiOutlineFilter, AiOutlineCar } from 'react-icons/ai'; // Asegúrate de importar AiOutlineFilter aquí
-import { FiUsers } from 'react-icons/fi';
-import { Container, StyledWrapper, Title, Text, CardContainer } from '../../components/common/CommonStyles';
-import Button from '../../components/common/Button';
+import { useNavigate } from 'react-router-dom';
+import { AiOutlineClockCircle } from 'react-icons/ai';
+import styled from 'styled-components';
+import { Container, Text, Input, StyledAddButton } from '../../components/common/CommonStyles';
 import colors from '../../assets/Colors';
+import Button from '../common/Button';
+import Loader from '../common/Loader';
+import { useDriver } from '../../context/DriverContext';
+import FeedbackModal from '../common/FeedbackModal';
+
+// Estilos personalizados
+const MainContainer = styled(Container)`
+    align-items: flex-start;
+    padding: 20px;
+    overflow-y: auto;
+`;
+
+const Title = styled.h2`
+    text-align: left;
+    font-size: 24px;
+    color: ${colors.white};
+    margin-bottom: 20px;
+    width: 100%;
+    span {
+        color: ${({ isDriver }) => (isDriver ? colors.primary : colors.third)};
+    }
+`;
+
+const FilterContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+    width: 100%;
+`;
+
+const ScrollableCardContainer = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 10px;
+    width: 100%;
+`;
+
+const TripCard = styled.div`
+    background-color: ${({ isDriver }) => (isDriver ? colors.primaryHover : colors.background)};
+    border-radius: 10px;
+    padding: 20px;
+    width: 250px;
+    color: ${colors.white};
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+`;
+
+const DriverContainer = styled.div`
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 20px;
+`;
+
+const CreateTripCard = styled.div`
+    background-color: ${colors.primaryHover};
+    border-radius: 10px;
+    padding: 20px;
+    width: 250px;
+    color: ${colors.white};
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    text-align: center;
+`;
+
+const NotificationsContainer = styled.div`
+    background-color: ${colors.primaryHover};
+    border-radius: 10px;
+    padding: 20px;
+    color: ${colors.white};
+    width: 250px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+`;
+
+const NotificationCard = styled.div`
+    background-color: ${colors.background};
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+    color: ${colors.white};
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+`;
+
+const TimeContainer = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: ${colors.white};
+`;
 
 const HomePage = () => {
-    const [isPassenger, setIsPassenger] = useState(true);
+    const { isDriver } = useDriver();
     const [username, setUsername] = useState('');
-    const [hasCar, setHasCar] = useState(false); // Nuevo estado para verificar si el usuario tiene un carro registrado
+    const [userId, setUserId] = useState('');
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
-    // Obtiene los datos del perfil del usuario desde el endpoint
+    const [trips, setTrips] = useState([]);
+    const [routeFilter, setRouteFilter] = useState('');
+    const [availableSeatsFilter, setAvailableSeatsFilter] = useState('');
+    const [filteredTrips, setFilteredTrips] = useState([]);
+
+    const [feedbackModal, setFeedbackModal] = useState({
+        isOpen: false,
+        type: '',
+        message: '',
+        details: ''
+    });
+
     useEffect(() => {
-        const fetchProfileData = async () => {
+        // Intento de obtener el nombre del usuario desde localStorage
+        const storedUsername = localStorage.getItem('username');
+        const storedUserId = localStorage.getItem('userId');
+        
+        if (storedUsername) setUsername(storedUsername);
+        if (storedUserId) setUserId(storedUserId);
+    }, []);
+
+    useEffect(() => {
+        const fetchTrips = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/users/me', {
-                    method: 'GET',
+                const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/all', {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
-                
-                if (!response.ok) throw new Error('Error al obtener los datos del perfil');
-
+    
+                if (!response.ok) throw new Error("Error al obtener los viajes");
+    
                 const data = await response.json();
-                setUsername(data.name || 'Usuario');
-                setHasCar(!!data.carRegistered); // Suponiendo que el endpoint devuelve un campo que indica si el usuario tiene un carro registrado
+                console.log("Datos de viajes:", data);
+                setTrips(data.trips || []);
+                setFilteredTrips(data.trips || []);
             } catch (error) {
-                console.error('Error:', error);
+                console.error("Error al obtener los viajes:", error);
             } finally {
                 setLoading(false);
             }
         };
-
-        fetchProfileData();
+    
+        fetchTrips();
     }, []);
-
-    // Manejo de cambio de roles (Pasajero/Conductor)
-    const toggleRole = () => {
-        if (isPassenger) {
-            // Al intentar cambiar a conductor, verifica si tiene un carro registrado
-            if (!hasCar) {
-                // Si no tiene carro registrado, muestra un mensaje de alerta y la opción de registrar
-                if (window.confirm("No tienes un carro registrado. ¿Deseas registrarlo ahora?")) {
-                    // Redirigir a la página de registro de carro
-                    window.location.href = '/registrar-carro';
-                }
-            } else {
-                // Si tiene un carro registrado, permite el cambio de rol
-                setIsPassenger(false);
-            }
-        } else {
-            // Cambio de "Conductor" a "Pasajero" sin verificación
-            setIsPassenger(true);
-        }
+    
+    const applyFilters = () => {
+        const filtered = trips.filter((trip) => {
+            return (
+                (!routeFilter || trip.route.toLowerCase().includes(routeFilter.toLowerCase())) &&
+                (!availableSeatsFilter || trip.availablePlaces >= parseInt(availableSeatsFilter))
+            );
+        });
+        setFilteredTrips(filtered);
     };
 
-    // Mostrar un loader mientras se carga el nombre del usuario
+    const handleCreateTrip = () => {
+        navigate('/create-trip');
+    };
+
+    const handleReserveTrip = async (tripId) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error("Token no encontrado. Por favor, inicia sesión.");
+    
+            const response = await fetch(`https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/reserve`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ tripId })
+            });
+    
+            if (!response.ok) throw new Error("Error al reservar el viaje");
+    
+            // Muestra modal de confirmación
+            setFeedbackModal({
+                isOpen: true,
+                type: 'confirmation',
+                message: 'Reserva realizada con éxito',
+                details: 'Tu reserva ha sido confirmada. ¡Disfruta del viaje!'
+            });
+        } catch (error) {
+            console.error("Error al reservar el viaje:", error);
+    
+            // Muestra modal de error
+            setFeedbackModal({
+                isOpen: true,
+                type: 'error',
+                message: 'Error al reservar el viaje',
+                details: error.message || 'Hubo un problema al realizar la reserva. Inténtalo nuevamente.'
+            });
+        }
+    };
+    
+    const closeFeedbackModal = () => {
+        setFeedbackModal({
+            isOpen: false,
+            type: '',
+            message: '',
+            details: ''
+        });
+    };
+
     if (loading) {
         return (
-            <Container>
-                <p style={{ color: colors.details }}>Cargando...</p>
-            </Container>
+            <MainContainer>
+                <Loader />
+            </MainContainer>
         );
     }
 
     return (
-        <Container > {/* Se habilita scroll y padding para márgenes */}
-            <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '80%' }}>
-                <Title>
-                    ¡Hola, <span style={{ color: colors.third }}> {isPassenger ? 'Pasajero' : 'Conductor'} </span> {username}!
-                </Title>
-                {/* Switch para cambiar entre "Pasajero" y "Conductor" */}
-                <StyledWrapper>
-                    <label className="switch" aria-label="Toggle Passenger/Driver">
-                        <input type="checkbox" checked={!isPassenger} onChange={toggleRole} />
-                        <span>{isPassenger ? <FiUsers size={20} /> : <AiOutlineCar size={20} />}</span> {/* Ícono condicional */}
-                        <span><AiOutlineUser size={20} /></span>
-                    </label>
-                </StyledWrapper>
-            </header>
+        <MainContainer>
+            <Title isDriver={isDriver}>
+                ¡Hola, <span>{isDriver ? 'Conductor' : 'Pasajero'}</span> {username}!
+            </Title>
 
-            {/* Filtros */}
-            <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
-                <Button 
-                    label="Filtrar por Ruta" 
-                    primary 
-                    icon={<AiOutlineFilter size={20} />}
-                    style={{ padding: '10px 20px', borderRadius: '15px', border: `1px solid ${colors.details}` }}
-                />
-                <Button 
-                    label="Filtrar por Cantidad de Puestos Disponibles" 
-                    primary 
-                    icon={<FiUsers size={20} />} 
-                    style={{ padding: '10px 20px', borderRadius: '15px', border: `1px solid ${colors.details}` }}
-                />
-            </div>
+            {!isDriver && (
+                <>
+                    <FilterContainer>
+                        <Input 
+                            placeholder="Filtrar por Ruta" 
+                            value={routeFilter} 
+                            onChange={(e) => setRouteFilter(e.target.value)} 
+                        />
+                        <Input 
+                            placeholder="Filtrar por Cantidad de Puestos Disponibles" 
+                            value={availableSeatsFilter} 
+                            onChange={(e) => setAvailableSeatsFilter(e.target.value)} 
+                            type="number"
+                        />
+                        <Button 
+                            label="Aplicar Filtros" 
+                            primary 
+                            onClick={applyFilters} 
+                        />
+                    </FilterContainer>
 
-            {/* Sección de Tarjetas */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginTop: '30px' }}>
-                {[1, 2, 3, 4].map((_, index) => (
-                    <CardContainer key={index} style={{ position: 'relative', padding: '20px', width: '300px' }}>
-                        <Text style={{ fontWeight: 'bold', color: colors.white }}>Ruta de {index % 2 === 0 ? 'Boyacá' : 'Autopista'}</Text>
-                        <Text style={{ color: colors.details }}>Hora: 8:00am</Text>
-                        <Text style={{ color: colors.details }}>Conductor: Juanita Diaz</Text>
-                        {index % 2 !== 0 && (
-                            <Text style={{ color: colors.third }}>Precio /persona: 5,000$</Text>
+                    <ScrollableCardContainer>
+                        {filteredTrips.length > 0 ? (
+                            filteredTrips.map((trip, index) => (
+                                <TripCard key={index} isDriver={isDriver}>
+                                    <Text>{trip.route}</Text>
+                                    <TimeContainer>
+                                        <AiOutlineClockCircle color={colors.white} />
+                                        <Text>{trip.timeTrip}</Text>
+                                    </TimeContainer>
+                                    <Text>Conductor: {trip.driver}</Text>
+                                    <Text>Precio/persona: ${trip.priceTrip}</Text>
+                                    <Text>Cupos: {trip.availablePlaces}</Text>
+                                    <img src={trip.image} alt="Car" style={{ width: '100%', borderRadius: '10px', marginTop: '10px' }} />
+                                    <StyledAddButton onClick={() => handleReserveTrip(trip.tripId)}>+</StyledAddButton>
+                                </TripCard>
+                            ))
+                        ) : (
+                            <Text>No hay viajes disponibles en este momento</Text>
                         )}
-                        {/* Ícono de personas */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: colors.details, marginTop: '10px' }}>
-                            <FiUsers />
-                            <Text>{index % 2 === 0 ? '3' : '1'}</Text>
-                        </div>
-                        <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-                            <Button label="+" primary style={{ width: '30px', height: '30px', borderRadius: '50%' }} />
-                        </div>
-                    </CardContainer>
-                ))}
-            </div>
-        </Container>
+                    </ScrollableCardContainer>
+                </>
+            )}
+
+            {isDriver && (
+                <DriverContainer>
+                    <CreateTripCard onClick={handleCreateTrip}>
+                        <Text style={{ fontWeight: 'bold' }}>Crea un viaje</Text>
+                        <Button primary label="+" />
+                    </CreateTripCard>
+
+                    <NotificationsContainer>
+                        <Title style={{ textAlign: 'left' }}>Notificaciones</Title>
+                        <NotificationCard>
+                            <Text style={{ fontWeight: 'bold' }}>Cancelación de Reserva</Text>
+                            <Text>Canceló <span style={{ color: colors.third }}>1</span> puesto</Text>
+                            <Text>Diego Gomez</Text>
+                        </NotificationCard>
+                        <NotificationCard>
+                            <Text style={{ fontWeight: 'bold' }}>Reserva</Text>
+                            <Text>Punto de Recogida: Calle 134</Text>
+                            <Text>Reservó <span style={{ color: colors.third }}>2</span> puestos</Text>
+                            <Text>Diego Gomez</Text>
+                        </NotificationCard>
+                    </NotificationsContainer>
+                </DriverContainer>
+            )}
+
+            {feedbackModal.isOpen && (
+                <FeedbackModal
+                    type={feedbackModal.type}
+                    message={feedbackModal.message}
+                    details={feedbackModal.details}
+                    onClose={closeFeedbackModal}
+                />
+            )}
+        </MainContainer>
     );
 };
 

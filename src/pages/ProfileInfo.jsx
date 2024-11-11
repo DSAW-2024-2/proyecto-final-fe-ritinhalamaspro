@@ -20,6 +20,7 @@ const ProfileInfo = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editableData, setEditableData] = useState({});
+  const [modalAction, setModalAction] = useState(''); // Nuevo estado para controlar la acción del modal
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -66,9 +67,8 @@ const ProfileInfo = () => {
       setEditableData({
         name: data.name || '',
         surName: data.surName || '',
-        universityID: data.universityID || '',
-        email: data.email || '',
-        phoneNumber: data.phoneNumber || ''
+        phoneNumber: data.phoneNumber || '',
+        password: data.password || '',
       });
       setImage(data.photoURL || data.carPhotoURL);
       setLoading(false);
@@ -94,6 +94,7 @@ const ProfileInfo = () => {
   };
 
   const confirmLogout = () => {
+    setModalAction('logout'); // Establece la acción como 'logout'
     setShowQuestionModal(true);
   };
 
@@ -114,12 +115,10 @@ const ProfileInfo = () => {
   };
 
   const handleSaveEdit = async () => {
-    setIsEditing(false);
-    setShowQuestionModal(false);
     const token = localStorage.getItem('token');
 
     try {
-      await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/users/me', {
+      const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/users/me', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -128,7 +127,11 @@ const ProfileInfo = () => {
         body: JSON.stringify(editableData)
       });
 
+      if (!response.ok) throw new Error('Error al guardar los cambios en el perfil');
+      
       fetchProfileData(token);
+      setIsEditing(false);
+      setShowQuestionModal(false);
     } catch (error) {
       console.error('Error al guardar los cambios:', error);
     }
@@ -165,9 +168,20 @@ const ProfileInfo = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: Colors.background }}>
-        <Loader />
-      </div>
+        <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '100vh', 
+            width: '100vw', 
+            backgroundColor: Colors.background, 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            zIndex: 1000 
+        }}>
+            <Loader />
+        </div>
     );
   }
 
@@ -178,14 +192,14 @@ const ProfileInfo = () => {
         backgroundColor: Colors.background,
         width: '350px',
         padding: '30px 40px',
-        borderRadius: '15px',
-        boxShadow: '0px 11px 5px rgba(0, 0, 0, 0.5)',
+        borderRadius: '20px',
+        boxShadow: '0px -3px 10px rgba(0, 0, 0, 0.5)',
         textAlign: 'center',
         color: Colors.white,
         marginTop: '20px',
       }}>
         <div style={{ position: 'absolute', top: '-150px', left: '50%', transform: 'translateX(-50%)' }}>
-          <ProfilePhoto imageUrl={image ? image : 'src/assets/ProfilePhoto.png'} size="120px" />
+          <ProfilePhoto imageUrl={image ? image : 'src/assets/PofilePhoto.png'} size="120px" />
         </div>
 
         {isPassenger && !isEditing && (
@@ -228,12 +242,10 @@ const ProfileInfo = () => {
               <>
                 <Input name="name" value={editableData.name} onChange={handleInputChange} placeholder="Nombre" style={{ marginBottom: '10px' }} />
                 <Input name="surName" value={editableData.surName} onChange={handleInputChange} placeholder="Apellido" style={{ marginBottom: '10px' }} />
-                <Input name="universityID" value={editableData.universityID} onChange={handleInputChange} placeholder="ID Universidad" style={{ marginBottom: '10px' }} />
-                <Input name="email" value={editableData.email} onChange={handleInputChange} placeholder="Correo Electrónico" style={{ marginBottom: '10px' }} />
                 <Input name="phoneNumber" value={editableData.phoneNumber} onChange={handleInputChange} placeholder="Teléfono" style={{ marginBottom: '10px' }} />
                 <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
                   <Button label="Cancelar" secondary onClick={handleCancelEdit} />
-                  <Button label="Guardar" primary onClick={() => setShowQuestionModal(true)} />
+                  <Button label="Guardar" primary onClick={() => { setModalAction('save'); setShowQuestionModal(true); }} />
                 </div>
               </>
             ) : (
@@ -245,14 +257,15 @@ const ProfileInfo = () => {
             )}
           </div>
         ) : (
-          <div style={{ textAlign: 'left', padding: '10px 0', color: Colors.details }}>
+          <div style={{ textAlign: 'left', padding: '10px 0', color: Colors.details, marginTop: '10px' }}>
             {profileData.plate ? (
               <>
                 <Text>Capacidad del vehículo: {profileData.capacity || 'Capacidad no disponible'}</Text>
                 <Text>Marca: {profileData.brand || 'Marca no disponible'}</Text>
                 <Text>Modelo: {profileData.model || 'Modelo no disponible'}</Text>
               </>
-            ) : (
+            ) :
+             (
               <div style={{ textAlign: 'center', color: Colors.third, padding: '20px' }}>
                 <Text>No tienes un carro registrado.</Text>
                 <Button label="Registrar Carro" primary onClick={() => navigate('/registrar-carro')} style={{ marginTop: '10px' }} />
@@ -272,10 +285,14 @@ const ProfileInfo = () => {
       {showQuestionModal && (
         <FeedbackModal
           type="question"
-          message="¿Está seguro de querer realizar esta operación?"
-          details="Esta acción es irreversible."
+          message={
+            modalAction === 'logout' ? "¿Está seguro de que desea cerrar sesión?" : "¿Está seguro de querer guardar los cambios?"
+          }
+          details={
+            modalAction === 'logout' ? "Si cierra sesión, deberá iniciar sesión nuevamente para acceder a su cuenta." : "Confirma para actualizar la información de tu perfil."
+          }
           onClose={() => setShowQuestionModal(false)}
-          onConfirm={handleSaveEdit}
+          onConfirm={modalAction === 'logout' ? handleLogout : handleSaveEdit}
         />
       )}
 

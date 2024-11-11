@@ -31,7 +31,7 @@ export const CircleImage = styled.div`
 `;
 
 export const Input = styled.input`
-  width: 100%;
+  width: 90%;
   border-radius: 10px;
   height: 2.5em;
   background-color: transparent;
@@ -39,8 +39,9 @@ export const Input = styled.input`
   border: 1px solid ${(props) => (props.isFocused ? colors.third : '#898A8D')};
   box-shadow: ${(props) => (props.isFocused ? `0 0 5px ${colors.third}` : 'none')};
   transition: border 0.3s ease, box-shadow 0.3s ease;
-
+  padding: 0px 10px;
 `;
+
 
 export const CardContainer = styled.div`
   background: linear-gradient(to bottom right, rgba(0, 0, 0, 0.156), rgba(0, 0, 0, 0.072));
@@ -136,13 +137,12 @@ export const Container =styled.div`
   overflow: hidden;
 `;
 
-
 export const StyledWrapper = styled.div`
   .switch {
     --_switch-bg-clr: ${colors.details};
     --_switch-padding: 2px; /* padding alrededor del botón */
-    --_slider-bg-clr: ${colors.primary}; /* color del slider no activado */
-    --_slider-bg-clr-on: ${colors.primary}; /* color del slider activado */
+    --_slider-bg-clr: ${colors.third}; /* color del slider cuando el lado izquierdo está seleccionado */
+    --_slider-bg-clr-on: ${colors.primary}; /* color del slider cuando el lado derecho está seleccionado */
     --_slider-txt-clr: #ffffff;
     --_label-padding: 0.5rem 1rem; /* reduce el tamaño global del switch */
     --_switch-easing: cubic-bezier(0.47, 1.64, 0.41, 0.8); /* easing para el cambio */
@@ -156,7 +156,7 @@ export const StyledWrapper = styled.div`
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     isolation: isolate;
-    margin:20px;
+    margin: 20px;
   }
 
   .switch input[type="checkbox"] {
@@ -239,3 +239,4 @@ export const StyledWrapper = styled.div`
     opacity: 1;
   }
 `;
+
