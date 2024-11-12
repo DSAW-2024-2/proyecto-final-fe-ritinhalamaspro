@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight, faHome, faMap, faUser } from '@fortawesome/free-solid-svg-icons';
-import { AiOutlineUser, AiOutlineCar } from 'react-icons/ai';
+import { faChevronLeft, faChevronRight, faHome, faMap, faUser, faRoad } from '@fortawesome/free-solid-svg-icons';
+import { AiOutlineUser, AiOutlineCar, AiOutlinePlusCircle } from 'react-icons/ai';
 import styled, { keyframes } from 'styled-components';
 import colors from '../../assets/Colors';
 import { useDriver } from '../../context/DriverContext';
@@ -17,21 +17,15 @@ const fadeInOut = keyframes`
     to { opacity: 1; }
 `;
 
-const StyledMenu = styled(Menu)`
-    display: flex;
-    flex-direction: column;
-    align-items: ${({ isOpen }) => (isOpen ? 'flex-start' : 'center')};
-    gap: 20px;
-    margin-top: 0px; 
-    padding-left: ${({ isOpen }) => (isOpen ? '10px' : '0')};
-    width: 100%;
+const StyledSidebar = styled(Sidebar)`
+  background-color: #1a1a2e;
+`;
 
-    /* Cambia la dirección en dispositivos móviles */
-    @media (max-width: 768px) {
-        flex-direction: row;
-        justify-content: space-around;
-        padding-left: 0;
-    }
+const StyledMenuItem = styled(MenuItem)`
+  &:hover {
+    color: ${colors.primaryHover};
+    background-color: ${colors.primary};
+  }
 `;
 
 const HeaderWrapper = styled.header`
@@ -139,13 +133,16 @@ function Header() {
     const verifyCarRegistration = async () => {
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/cars/me', {
+            const url = `${import.meta.env.VITE_API_URL}/cars/me`;
+
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
             });
+
             const data = await response.json();
             if (data && Object.keys(data).length > 0) {
                 setHasCarRegistered(true);
@@ -155,21 +152,53 @@ function Header() {
                 setHasCarRegistered(false);
                 return false;
             }
+
         } catch (error) {
             console.error('Error al verificar el registro del carro:', error);
             return false;
         }
     };
 
+    const verifyIsDriver = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/cars/me', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+   
+            if (!response.ok) {
+                setShowRegisterCarModal(true);
+                return true;
+            }
+            else{
+                setShowRegisterCarModal(false);
+                return false;
+            }
+   
+        } catch (error) {
+            console.error('Error al verificar el registro del carro:', error);
+            return false;
+        }
+    };
+   
     const handleToggleDriverMode = async () => {
         if (!isDriver) {
-            const hasCar = await verifyCarRegistration();
-            if (!hasCar) return;
+            const hasCar = await verifyIsDriver();
+            console.log(hasCar)
+            if(!hasCar){
+              toggleDriverMode();
+            }
+          
+        }else{
+            toggleDriverMode();
         }
-        toggleDriverMode();
     };
 
-    const confirmToggleDriverMode = () => {
+    const confirmToggleDriverMode = async() => {
         setShowToggleModeModal(true);
     };
 
@@ -189,109 +218,156 @@ function Header() {
         if (isDriver) {
             if (path === '/reserved-trips') navigate('/created-trips');
         } else {
-            if (path === '/created-trips') navigate('/reserved-trips');
+            if (path === '/create-trip'){
+                navigate('/reserved-trips');
+            }
+            if (path === '/created-trips') {
+                navigate('/home');
+            }
         }
-    }, [isDriver, path, navigate]);
+    }, [isDriver, path]);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        console.log('Path:', path);
+
+        if (token) {
+            setIsLogged(true);
+        } else {
+            setIsLogged(false);
+        }
+        console.log('Header Open:', isLogged);
+    }, [path]);
 
     return (
         <>
             {isLogged && (
-                <HeaderWrapper isOpen={headerOpen}>
-                    <ToggleButton 
+                <Sidebar
+                backgroundColor={colors.background}
+                collapsed={!headerOpen}
+                >
+                <ToggleButton 
                         isOpen={headerOpen} 
                         onClick={() => setHeaderOpen(!headerOpen)}
                     >
                         <FontAwesomeIcon icon={headerOpen ? faChevronLeft : faChevronRight} />
                     </ToggleButton>
                     
-                    <CenterContainer>
-                        <Logo src={logo} alt="Logo" isOpen={headerOpen} />
-                        
-                        {headerOpen && hasCarRegistered && (
-                            <StyledWrapper>
-                                <label className="switch" aria-label="Toggle Passenger/Driver">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={isDriver} 
-                                        onChange={confirmToggleDriverMode} 
-                                    />
-                                    <span>
-                                        <AiOutlineUser />
-                                    </span>
-                                    <span>
-                                        <AiOutlineCar />
-                                    </span>
-                                </label>
-                            </StyledWrapper>
-                        )}
-                    </CenterContainer>
-
-                    <StyledMenu iconShape="square" isOpen={headerOpen}>
-                        <MenuItem
-                            component={<Link to="/home" />}
-                            icon={
-                                <Icon 
-                                    icon={faHome} 
-                                    isDriver={isDriver} 
-                                    active={path === '/home'} 
+                <CenterContainer>
+                    <Logo src={logo} alt="Logo" isOpen={headerOpen} />
+                    
+                    {headerOpen && hasCarRegistered && (
+                        <StyledWrapper>
+                            <label className="switch" aria-label="Toggle Passenger/Driver">
+                                <input 
+                                    type="checkbox" 
+                                    checked={isDriver} 
+                                    onChange={confirmToggleDriverMode} 
                                 />
-                            }
-                        >
-                            <MenuText isOpen={headerOpen}>Inicio</MenuText>
-                        </MenuItem>
-                        <MenuItem
-                            component={<Link to={isDriver ? "/created-trips" : "/reserved-trips"} />}
-                            icon={
-                                <Icon 
-                                    icon={faMap} 
-                                    isDriver={isDriver} 
-                                    active={path === (isDriver ? '/created-trips' : '/reserved-trips')}
-                                />
-                            }
-                        >
-                            <MenuText isOpen={headerOpen}>{isDriver ? 'Viajes Creados' : 'Viajes Reservados'}</MenuText>
-                        </MenuItem>
-                        
-                        <MenuItem
-                            component={<Link to="/pagina-principal" />}
-                            icon={
-                                <Icon 
-                                    icon={faUser} 
-                                    isDriver={isDriver} 
-                                    active={path === '/pagina-principal'} 
-                                />
-                            }
-                        >
-                            <MenuText isOpen={headerOpen}>Perfil</MenuText>
-                        </MenuItem>
-                    </StyledMenu>
-
-                    {showRegisterCarModal && (
-                        <FeedbackModal
-                            type="question"
-                            message="No tienes un carro registrado."
-                            details="Para cambiar a modo conductor, primero debes registrar un carro."
-                            onClose={() => setShowRegisterCarModal(false)}
-                            onConfirm={() => {
-                                setShowRegisterCarModal(false);
-                                navigate('/registrar-carro');
-                            }}
-                        />
+                                <span>
+                                    <AiOutlineUser />
+                                </span>
+                                <span>
+                                    <AiOutlineCar />
+                                </span>
+                            </label>
+                        </StyledWrapper>
                     )}
-
-                    {showToggleModeModal && (
-                        <FeedbackModal
-                            type="question"
-                            message={`¿Estás seguro de cambiar a modo ${isDriver ? 'Pasajero' : 'Conductor'}?`}
-                            details={`Este cambio afectará la forma en que usas la aplicación.`}
-                            onClose={() => setShowToggleModeModal(false)}
-                            onConfirm={() => {
-                                setShowToggleModeModal(false);
-                                handleToggleDriverMode();
-                            }}
-                        />
+                </CenterContainer>
+                <Menu iconShape="square" isOpen={headerOpen}>
+                    <StyledMenuItem
+                        component={<Link to="/home" />}
+                        icon={
+                            <Icon 
+                                icon={faHome} 
+                                isDriver={isDriver} 
+                                active={path === '/home'} 
+                            />
+                        }
+                    >
+                        <MenuText isOpen={headerOpen}>Inicio</MenuText>
+                    </StyledMenuItem>
+                    {isDriver && (
+                        <MenuItem
+                            component={<Link to="/create-trip" />}
+                            icon={
+                                <Icon 
+                                    as={AiOutlinePlusCircle} 
+                                    isDriver={isDriver} 
+                                    active={path === '/create-trip'}
+                                />
+                            }
+                        >
+                            <MenuText isOpen={headerOpen}>Crear Viaje</MenuText>
+                        </MenuItem>
                     )}
-                </HeaderWrapper>
+                    <MenuItem
+                        component={<Link to={isDriver ? "/created-trips" : "/reserved-trips"} />}
+                        icon={
+                            <Icon 
+                                icon={faMap} 
+                                isDriver={isDriver} 
+                                active={path === (isDriver ? '/created-trips' : '/reserved-trips')}
+                            />
+                        }
+                        color='white'
+                    >
+                        <MenuText isOpen={headerOpen}>{isDriver ? 'Viajes Creados' : 'Viajes Reservados'}</MenuText>
+                    </MenuItem>
+                    
+                    <MenuItem
+                        component={<Link to="/current-trips" />}
+                        icon={
+                            <Icon 
+                                icon={faRoad} 
+                                isDriver={isDriver} 
+                                active={path === '/current-trips'} 
+                            />
+                        }
+                    >
+                        <MenuText isOpen={headerOpen}>Viajes en Curso</MenuText>
+                    </MenuItem>
+                    <MenuItem
+                        component={<Link to="/pagina-principal" />}
+                        icon={
+                            <Icon 
+                                icon={faUser} 
+                                isDriver={isDriver} 
+                                active={path === '/pagina-principal'} 
+                            />
+                        }
+                    >
+                        <MenuText isOpen={headerOpen}>Perfil</MenuText>
+                    </MenuItem>
+                </Menu>
+                {showRegisterCarModal && (
+                    <FeedbackModal
+                        type="question"
+                        message="No tienes un carro registrado."
+                        details="Para cambiar a modo conductor, primero debes registrar un carro."
+                        onClose={() => setShowRegisterCarModal(false)}
+                        onConfirm={() => {
+                            setShowRegisterCarModal(false);
+                            navigate('/registrar-carro');
+                        }}
+                    />
+                )}
+
+                {showToggleModeModal && (
+                    <FeedbackModal
+                        type="question"
+                        message={`¿Estás seguro de cambiar a modo ${isDriver ? 'Pasajero' : 'Conductor'}?`}
+                        details={`Este cambio afectará la forma en que usas la aplicación.`}
+                        onClose={() => setShowToggleModeModal(false)}
+                        onConfirm={() => {
+                            setShowToggleModeModal(false);
+                            handleToggleDriverMode();
+                            navigate('/home')
+                        }}
+                    />
+                )}
+            </Sidebar>
+
             )}
         </>
     );

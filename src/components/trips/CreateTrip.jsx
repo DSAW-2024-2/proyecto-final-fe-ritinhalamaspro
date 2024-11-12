@@ -93,11 +93,13 @@ const CreateTrip = () => {
     const [selectingOrigin, setSelectingOrigin] = useState(false);
     const [directions, setDirections] = useState(null); 
 
-    useEffect(() => {
-        if (origin && destination) {
-            calculateRoute();
-        }
-    }, [origin, destination]);
+    const [showReservationModal, setShowReservationModal] = useState(false);
+    const [selectedTrip, setSelectedTrip] = useState(null);
+    const [reservationLocation, setReservationLocation] = useState(null);
+    const [reservationQuery, setReservationQuery] = useState('');
+
+
+    
 
     const handleMapClick = async (event) => {
         const location = {
@@ -141,23 +143,7 @@ const CreateTrip = () => {
         if (setLocation === setOrigin) await fetchSectorFromLocation(location);
     };
 
-    const calculateRoute = () => {
-        const directionsService = new window.google.maps.DirectionsService();
-        directionsService.route(
-            {
-                origin,
-                destination,
-                travelMode: window.google.maps.TravelMode.DRIVING,
-            },
-            (result, status) => {
-                if (status === window.google.maps.DirectionsStatus.OK) {
-                    setDirections(result);
-                } else {
-                    console.error(`error fetching directions ${result}`);
-                }
-            }
-        );
-    };
+   
 
     const handleCreateTrip = async () => {
         if (passengerCount && route && price && time && date && origin && destination) {

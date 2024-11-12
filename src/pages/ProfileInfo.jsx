@@ -62,6 +62,7 @@ const ProfileInfo = () => {
       if (!isPassenger) {
         data = Object.values(data)[0];
       }
+      console.log(data);
 
       setProfileData(data);
       setEditableData({

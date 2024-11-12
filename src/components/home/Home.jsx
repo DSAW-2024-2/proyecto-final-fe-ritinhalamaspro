@@ -112,6 +112,31 @@ const TimeContainer = styled.div`
     color: ${colors.white};
 `;
 
+const ReservationModalContainer = styled.div`
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: ${colors.background};
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    width: 80%;
+    max-width: 400px;
+`;
+
+const Overlay = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+`;
+
+
 const HomePage = () => {
     const { isDriver } = useDriver();
     const [username, setUsername] = useState('');
@@ -130,6 +155,14 @@ const HomePage = () => {
         message: '',
         details: ''
     });
+
+    const [showReservationModal, setShowReservationModal] = useState(false);
+    const [selectedTrip, setSelectedTrip] = useState(null);
+    const [reservationDetails, setReservationDetails] = useState({
+        seats: '',
+        pickupLocation: ''
+    });
+
 
     useEffect(() => {
         // Intento de obtener el nombre del usuario desde localStorage
@@ -165,6 +198,12 @@ const HomePage = () => {
     
         fetchTrips();
     }, []);
+
+    const handleShowTripDetails = (trip) => {
+        setSelectedTrip(trip);
+        setShowReservationModal(true);
+    };
+    
     
     const applyFilters = () => {
         const filtered = trips.filter((trip) => {
@@ -180,7 +219,19 @@ const HomePage = () => {
         navigate('/create-trip');
     };
 
-    const handleReserveTrip = async (tripId) => {
+
+    const handleReserveTrip = async () => {
+        const { seats, pickupLocation } = reservationDetails;
+        if (!seats || !pickupLocation) {
+            setFeedbackModal({
+                isOpen: true,
+                type: 'error',
+                message: 'Datos incompletos',
+                details: 'Por favor, completa todos los campos antes de reservar.'
+            });
+            return;
+        }
+        
         try {
             const token = localStorage.getItem('token');
             if (!token) throw new Error("Token no encontrado. Por favor, inicia sesión.");
@@ -191,22 +242,25 @@ const HomePage = () => {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ tripId })
+                body: JSON.stringify({ 
+                    tripId: selectedTrip.id,
+                    seats,
+                    pickupLocation
+                })
             });
     
             if (!response.ok) throw new Error("Error al reservar el viaje");
     
-            // Muestra modal de confirmación
             setFeedbackModal({
                 isOpen: true,
                 type: 'confirmation',
                 message: 'Reserva realizada con éxito',
                 details: 'Tu reserva ha sido confirmada. ¡Disfruta del viaje!'
             });
+            setShowReservationModal(false);
         } catch (error) {
             console.error("Error al reservar el viaje:", error);
     
-            // Muestra modal de error
             setFeedbackModal({
                 isOpen: true,
                 type: 'error',
@@ -214,6 +268,14 @@ const HomePage = () => {
                 details: error.message || 'Hubo un problema al realizar la reserva. Inténtalo nuevamente.'
             });
         }
+    };
+
+    const closeReservationModal = () => {
+        setShowReservationModal(false);
+        setReservationDetails({
+            seats: '',
+            pickupLocation: ''
+        });
     };
     
     const closeFeedbackModal = () => {
@@ -264,22 +326,43 @@ const HomePage = () => {
                         {filteredTrips.length > 0 ? (
                             filteredTrips.map((trip, index) => (
                                 <TripCard key={index} isDriver={isDriver}>
-                                    <Text>{trip.route}</Text>
+                                    <Text>De: ${trip.startPoint.formattedAddress || trip.startPoint.location}</Text>
+                                    <Text>A: ${trip.endPoint.formattedAddress || trip.endPoint.location}</Text>
                                     <TimeContainer>
                                         <AiOutlineClockCircle color={colors.white} />
-                                        <Text>{trip.timeTrip}</Text>
+                                        <Text>{trip.departureTime}</Text>
                                     </TimeContainer>
-                                    <Text>Conductor: {trip.driver}</Text>
-                                    <Text>Precio/persona: ${trip.priceTrip}</Text>
-                                    <Text>Cupos: {trip.availablePlaces}</Text>
-                                    <img src={trip.image} alt="Car" style={{ width: '100%', borderRadius: '10px', marginTop: '10px' }} />
-                                    <StyledAddButton onClick={() => handleReserveTrip(trip.tripId)}>+</StyledAddButton>
-                                </TripCard>
+                                    <Text>Precio/persona: ${trip.price}</Text>
+                                    <Text>Cupos: {trip.capacity}</Text>
+                                    <StyledAddButton onClick={() => handleShowTripDetails(trip)}>+</StyledAddButton>
+                                    </TripCard>
                             ))
                         ) : (
                             <Text>No hay viajes disponibles en este momento</Text>
                         )}
                     </ScrollableCardContainer>
+                    {showReservationModal && (
+    <>
+        <Overlay onClick={closeReservationModal} />
+        <ReservationModalContainer>
+            <Title>Reservar Viaje</Title>
+            <Input
+                placeholder="Número de asientos"
+                type="number"
+                value={reservationDetails.seats}
+                onChange={(e) => setReservationDetails({ ...reservationDetails, seats: e.target.value })}
+            />
+            <Input
+                placeholder="Lugar de recogida"
+                value={reservationDetails.pickupLocation}
+                onChange={(e) => setReservationDetails({ ...reservationDetails, pickupLocation: e.target.value })}
+            />
+            <Button primary label="Reservar" onClick={handleReserveTrip} />
+            <Button label="Cancelar" onClick={closeReservationModal} />
+        </ReservationModalContainer>
+    </>
+)}
+
                 </>
             )}
 
