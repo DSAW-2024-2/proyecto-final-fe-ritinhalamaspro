@@ -9,7 +9,7 @@ import styled, { keyframes } from 'styled-components';
 import colors from '../../assets/Colors';
 import { useDriver } from '../../context/DriverContext';
 import FeedbackModal from '../common/FeedbackModal';
-import logo from '../../assets/logo.png';
+import logo from '../../assets/Logo.png';
 import { StyledWrapper } from '../common/CommonStyles';
 
 const fadeInOut = keyframes`
@@ -83,7 +83,7 @@ const CenterContainer = styled.div`
 `;
 
 const Logo = styled.img`
-    width: ${({ isOpen }) => (isOpen ? '120px' : '0')};
+    width: ${({ isOpen }) => (isOpen ? '100px' : '0')};
     height: auto;
     transition: width 0.3s ease, opacity 0.3s ease;
     opacity: ${({ isOpen }) => (isOpen ? '1' : '0')};

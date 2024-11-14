@@ -224,7 +224,7 @@ const Register = () => {
   const handleRoleSubmit = (e) => {
     e.preventDefault();
     if (selectedRole === "Conductor") {
-      navigate("/registrar-carro");
+      navigate("/register-car");
     } else {
       navigate("/pagina-principal");
     }

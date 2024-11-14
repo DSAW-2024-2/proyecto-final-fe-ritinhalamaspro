@@ -7,6 +7,8 @@ import FeedbackModal from '../components/common/FeedbackModal';
 import Button from '../components/common/Button';
 import { Container, Text, Title, StyledWrapper, StyledAddButton, Input } from '../components/common/CommonStyles';
 import Colors from '../assets/Colors';
+import {useDispatch, useSelector} from "react-redux"
+import { clearUser } from '../features/users/UserSlice';
 
 const ProfileInfo = () => {
   const navigate = useNavigate();
@@ -21,7 +23,7 @@ const ProfileInfo = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editableData, setEditableData] = useState({});
   const [modalAction, setModalAction] = useState(''); // Nuevo estado para controlar la acción del modal
-
+  const dispatch = useDispatch();
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -88,6 +90,8 @@ const ProfileInfo = () => {
         },
       });
       localStorage.removeItem('token');
+      dispatch(clearUser());
+
       navigate('/iniciar-sesion');
     } catch (error) {
       console.error('Error al cerrar sesión:', error);

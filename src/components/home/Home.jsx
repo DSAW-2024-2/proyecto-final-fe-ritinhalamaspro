@@ -9,6 +9,8 @@ import Button from '../common/Button';
 import Loader from '../common/Loader';
 import { useDriver } from '../../context/DriverContext';
 import FeedbackModal from '../common/FeedbackModal';
+import { selectName } from '../../features/users/UserSlice';
+import {useDispatch, useSelector} from "react-redux"
 
 // Estilos personalizados
 const MainContainer = styled(Container)`
@@ -16,6 +18,7 @@ const MainContainer = styled(Container)`
     padding: 20px;
     overflow-y: auto;
 `;
+
 
 const Title = styled.h2`
     text-align: left;
@@ -143,11 +146,13 @@ const HomePage = () => {
     const [userId, setUserId] = useState('');
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const id = useSelector(selectName)
 
     const [trips, setTrips] = useState([]);
     const [routeFilter, setRouteFilter] = useState('');
     const [availableSeatsFilter, setAvailableSeatsFilter] = useState('');
     const [filteredTrips, setFilteredTrips] = useState([]);
+    const [userName, setUserName] = useState('');
 
     const [feedbackModal, setFeedbackModal] = useState({
         isOpen: false,
@@ -163,12 +168,17 @@ const HomePage = () => {
         pickupLocation: ''
     });
 
+    useEffect(() => {
+        setTimeout(() => {
+            setUserName(id)
+        }, 1000);
+    }, [id]);
+
 
     useEffect(() => {
         // Intento de obtener el nombre del usuario desde localStorage
         const storedUsername = localStorage.getItem('username');
-        const storedUserId = localStorage.getItem('userId');
-        
+        const storedUserId = localStorage.getItem('userId');        
         if (storedUsername) setUsername(storedUsername);
         if (storedUserId) setUserId(storedUserId);
     }, []);
@@ -295,10 +305,11 @@ const HomePage = () => {
         );
     }
 
+
     return (
         <MainContainer>
             <Title isDriver={isDriver}>
-                ¡Hola, <span>{isDriver ? 'Conductor' : 'Pasajero'}</span> {username}!
+                ¡Hola, <span>{isDriver ? 'Conductor' : 'Pasajero'}</span> {userName}!
             </Title>
 
             {!isDriver && (
