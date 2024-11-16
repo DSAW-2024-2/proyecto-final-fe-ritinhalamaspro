@@ -344,6 +344,7 @@ const HomePage = () => {
     
     
     
+    
 
     const closeReservationModal = () => {
         setShowReservationModal(false);
@@ -513,16 +514,22 @@ const HomePage = () => {
             </Autocomplete>
 
             <Button
-                primary
-                label="Enviar solicitud de reserva"
-                onClick={() => {
+    primary
+    label="Enviar solicitud de reserva"
+    onClick={() => {
+        const requestData = {
+            tripId: selectedTrip?.tripId, // Asegúrate de que el ID del viaje esté presente
+            location: reservationDetails.pickupLocation, // Dirección o coordenadas del punto de recogida
+            seats: reservationDetails.seats, // Número de asientos reservados
+        };
 
-                    console.log('Datos enviados al endpoint:', requestData);
+        console.log('Datos enviados al endpoint:', requestData);
 
-                    handleReserveTrip(); // Llamada al método para manejar la reserva
-                }}
-                style={{ marginTop: '20px', alignSelf: 'center' }}
-            />
+        handleReserveTrip(requestData); // Llama a la función con el objeto requestData
+    }}
+    style={{ marginTop: '20px', alignSelf: 'center' }}
+/>
+
         </ReservationModalContainer>
     </>
 )
