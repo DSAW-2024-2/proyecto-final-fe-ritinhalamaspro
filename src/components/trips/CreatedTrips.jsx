@@ -1,12 +1,11 @@
-// src/pages/CreatedTrips/CreatedTrips.jsx
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Title, Text } from '../../components/common/CommonStyles';
 import colors from '../../assets/Colors';
 import Button from '../../components/common/Button';
 import FeedbackModal from '../../components/common/FeedbackModal';
-import Loader from '../../components/common/Loader'; // Importa el componente Loader
-import { AiOutlineDelete, AiOutlineUser } from 'react-icons/ai';
+import Loader from '../../components/common/Loader';
+import { AiOutlineDelete, AiOutlineUser, AiOutlineCloseCircle } from 'react-icons/ai';
 
 const Container = styled.div`
     display: flex;
@@ -51,13 +50,6 @@ const TripInfo = styled.div`
     gap: 5px;
 `;
 
-const TripImage = styled.img`
-    width: 80px;
-    border-radius: 8px;
-    align-self: flex-end;
-    margin-top: auto;
-`;
-
 const DeleteIcon = styled.div`
     position: absolute;
     top: 10px;
@@ -67,69 +59,55 @@ const DeleteIcon = styled.div`
     font-size: 20px;
 `;
 
-const DetailsContainer = styled.div`
-    flex: 0.4;
+const Overlay = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+`;
+
+const DetailsModal = styled.div`
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background-color: ${colors.primaryHover};
+    padding: 30px;
     border-radius: 15px;
-    padding: 20px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    margin-left: 20px;
-    max-height: 80%;
-    overflow-y: auto;
-`;
-
-const ReservationsContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-`;
-
-const ReservationCard = styled.div`
-    background-color: ${colors.details};
-    border-radius: 10px;
-    padding: 10px;
-    color: ${colors.white};
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-`;
-
-const ReservationText = styled(Text)`
-    font-size: 14px;
+    z-index: 1000;
+    width: 90%;
+    max-width: 500px;
 `;
 
 const CreatedTrips = () => {
     const [trips, setTrips] = useState([]);
-    const [carPhotoURL, setCarPhotoURL] = useState(null);
     const [selectedTrip, setSelectedTrip] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-    const [tripToDelete, setTripToDelete] = useState(null);
-    const [loading, setLoading] = useState(true); // Estado de carga
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        
-
         const fetchTrips = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/all', {
+                const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/my-trips', {
                     headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                        'Authorization': `Bearer ${token}`,
+                    },
                 });
 
-                if (!response.ok) throw new Error("Error al obtener los viajes");
+                if (!response.ok) throw new Error('Error al obtener los viajes creados');
 
                 const data = await response.json();
-                setTrips(data.trips || []);
+                setTrips(data.myTrips || []);
             } catch (error) {
-                console.error("Error al obtener los viajes:", error);
+                console.error('Error al obtener los viajes creados:', error);
             } finally {
-                setLoading(false); // Desactiva el loader después de cargar los datos
+                setLoading(false);
             }
         };
 
@@ -138,58 +116,86 @@ const CreatedTrips = () => {
 
     const handleTripClick = (trip) => {
         setSelectedTrip(trip);
+        setShowDetailsModal(true);
     };
 
     const handleDeleteClick = (trip) => {
-        setTripToDelete(trip);
-        setShowModal(true);
+        setSelectedTrip(trip);
+        setShowDeleteModal(true);
     };
 
     const confirmDeleteTrip = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/${tripToDelete.tripId}`, {
+            if (!selectedTrip || !selectedTrip.tripId) {
+                console.error('El tripId no está definido');
+                return;
+            }
+
+            const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/delete-trip', {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                }
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    tripId: selectedTrip.tripId,
+                }),
             });
 
-            if (!response.ok) throw new Error("Error al eliminar el viaje");
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error del servidor:', errorData.message || 'Error desconocido');
+                throw new Error('Error al eliminar el viaje');
+            }
 
-            setTrips(trips.filter((trip) => trip.tripId !== tripToDelete.tripId));
-            setShowModal(false);
-            setTripToDelete(null);
+            setTrips(trips.filter((trip) => trip.tripId !== selectedTrip.tripId));
+            setShowDeleteModal(false);
+            setSelectedTrip(null);
         } catch (error) {
-            console.error("Error al eliminar el viaje:", error);
+            console.error('Error al eliminar el viaje:', error);
         }
     };
 
+    const closeModals = () => {
+        setShowDetailsModal(false);
+        setShowDeleteModal(false);
+        setSelectedTrip(null);
+    };
+
     if (loading) {
-        return <Loader />; // Muestra el loader mientras se cargan los datos
+        return <Loader />;
     }
 
     return (
         <Container>
             <TripsList>
-                <Title>Viajes <span style={{ color: colors.third }}>Creados</span></Title>
+                <Title>
+                    Viajes <span style={{ color: colors.third }}>Creados</span>
+                </Title>
                 <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
                     {trips.length > 0 ? (
                         trips.map((trip) => (
                             <TripCard key={trip.tripId} onClick={() => handleTripClick(trip)}>
-                                <DeleteIcon onClick={(e) => { e.stopPropagation(); handleDeleteClick(trip); }}>
+                                <DeleteIcon
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteClick(trip);
+                                    }}
+                                >
                                     <AiOutlineDelete />
                                 </DeleteIcon>
                                 <TripInfo>
                                     <Text style={{ fontWeight: 'bold', fontSize: '16px' }}>{trip.sector}</Text>
                                     <Text style={{ color: colors.details }}>Hora: {trip.departureTime}</Text>
-                                    <Text style={{ color: colors.details }}>Precio /persona: <span style={{ color: colors.third }}>${trip.price}</span></Text>
+                                    <Text style={{ color: colors.details }}>
+                                        Precio /persona: <span style={{ color: colors.third }}>${trip.price}</span>
+                                    </Text>
                                 </TripInfo>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                                     <AiOutlineUser size={16} />
                                     <Text>{trip.reservations ? trip.reservations.length : 0} Reservas</Text>
                                 </div>
-                                <TripImage src={carPhotoURL} alt="Car" />
                             </TripCard>
                         ))
                     ) : (
@@ -198,37 +204,51 @@ const CreatedTrips = () => {
                 </div>
             </TripsList>
 
-            {selectedTrip && (
-                <DetailsContainer>
-                    <Title>{selectedTrip.sector}</Title>
-                    <TripImage src={carPhotoURL || 'https://via.placeholder.com/150'} alt="Car" style={{ width: '150px', borderRadius: '10px' }} />
-                    <Text>Reservas</Text>
-                    <ReservationsContainer>
-                        {selectedTrip.reservations && selectedTrip.reservations.length > 0 ? (
-                            selectedTrip.reservations.map((reservation) => (
-                                <ReservationCard key={reservation.id}>
-                                    <AiOutlineUser size={20} />
-                                    <div>
-                                        <ReservationText>Punto de Recogida: {reservation.pickupPoint}</ReservationText>
-                                        <ReservationText>Reservó <span style={{ color: colors.third }}>{reservation.seats}</span> puestos</ReservationText>
-                                        <ReservationText>{reservation.passenger}</ReservationText>
-                                    </div>
-                                </ReservationCard>
-                            ))
-                        ) : (
-                            <Text>No hay reservas para este viaje</Text>
-                        )}
-                    </ReservationsContainer>
-                    <Button primary label="Cancelar Viaje" />
-                </DetailsContainer>
+            {showDetailsModal && selectedTrip && (
+                <>
+                    <Overlay onClick={closeModals} />
+                    <DetailsModal style={{ backgroundColor: colors.background }}>
+    <AiOutlineCloseCircle
+        size={24}
+        color={colors.white}
+        style={{
+            position: 'absolute',
+            top: 15,
+            right: 15,
+            cursor: 'pointer',
+        }}
+        onClick={closeModal}
+    />
+    <Title>{selectedTrip.sector}</Title>
+    <Text>
+        Desde:{' '}
+        {typeof selectedTrip.startPoint === 'object'
+            ? `Lat: ${selectedTrip.startPoint.lat}, Lng: ${selectedTrip.startPoint.lng}`
+            : selectedTrip.startPoint}
+    </Text>
+    <Text>
+        Hasta:{' '}
+        {typeof selectedTrip.endPoint === 'object'
+            ? `Lat: ${selectedTrip.endPoint.lat}, Lng: ${selectedTrip.endPoint.lng}`
+            : selectedTrip.endPoint}
+    </Text>
+    <Text>Hora de salida: {selectedTrip.departureTime}</Text>
+    <Text>Precio /persona: ${selectedTrip.price}</Text>
+    <Text>Reservas: {selectedTrip.reservations?.length || 0}</Text>
+    <Button label="Iniciar Viaje" primary onClick={handleStartTrip} />
+</DetailsModal>
+
+                </>
             )}
 
-            {showModal && (
+            {showDeleteModal && (
                 <FeedbackModal
                     type="question"
                     message="¿Está seguro de que desea eliminar este viaje?"
-                    details={`Esta acción eliminará permanentemente el viaje: ${tripToDelete ? tripToDelete.sector : ''}`}
-                    onClose={() => setShowModal(false)}
+                    details={`Esta acción eliminará permanentemente el viaje: ${
+                        selectedTrip ? selectedTrip.sector : ''
+                    }`}
+                    onClose={closeModals}
                     onConfirm={confirmDeleteTrip}
                 />
             )}

@@ -106,16 +106,30 @@ const CreateTrip = () => {
             lat: event.latLng.lat(),
             lng: event.latLng.lng(),
         };
-        
-        if (selectingOrigin) {
-            setOrigin(location);
-            setOriginQuery(`Lat: ${location.lat.toFixed(4)}, Lng: ${location.lng.toFixed(4)}`);
-            await fetchSectorFromLocation(location); // Obtener el sector automáticamente
-        } else {
-            setDestination(location);
-            setDestinationQuery(`Lat: ${location.lat.toFixed(4)}, Lng: ${location.lng.toFixed(4)}`);
+    
+        try {
+            const geocoder = new window.google.maps.Geocoder();
+            geocoder.geocode({ location }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    const address = results[0].formatted_address;
+                    if (selectingOrigin) {
+                        setOrigin(location);
+                        setOriginQuery(address); // Usar la dirección más cercana
+                        fetchSectorFromLocation(location); // Obtener el sector automáticamente
+                    } else {
+                        setDestination(location);
+                        setDestinationQuery(address); // Usar la dirección más cercana
+                    }
+                } else {
+                    console.error('Error al obtener la dirección:', status);
+                }
+            });
+        } catch (error) {
+            console.error('Error con el servicio de geocodificación:', error);
         }
     };
+
+    
 
     const fetchSectorFromLocation = async (location) => {
         const geocoder = new window.google.maps.Geocoder();
@@ -154,8 +168,13 @@ const CreateTrip = () => {
                     endPoint: destination,
                     sector: route,
                     departureTime: `${time}`,
-                    price: parseFloat(price)
+                    price: parseFloat(price),
+                    date: date,
+                    capacity: parseInt(passengerCount, 10)
                 };
+
+ 
+
                 
                 console.log("JSON enviado:", JSON.stringify(tripData));
                 console.log("Token enviado:", token);
