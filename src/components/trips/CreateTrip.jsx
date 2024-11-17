@@ -8,9 +8,8 @@ import Button from '../../components/common/Button';
 import FeedbackModal from '../../components/common/FeedbackModal';
 import { useNavigate } from 'react-router-dom';
 import { AiOutlineClockCircle, AiOutlineCalendar, AiOutlineAim } from 'react-icons/ai';
+import { useGoogleMaps } from '../common/GoogleMapsProvider';
 
-const GOOGLE_MAPS_LIBRARIES = ['places'];
-const apiKey = 'AIzaSyAhrQVoCw36PqqgNMN-AztGhfmqht47ZbI';
 
 const Container = styled.div`
     display: flex;
@@ -78,7 +77,6 @@ const ButtonContainer = styled.div`
 
 const CreateTrip = () => {
     const navigate = useNavigate();
-    const { isLoaded } = useLoadScript({ googleMapsApiKey: apiKey, libraries: GOOGLE_MAPS_LIBRARIES });
     const [passengerCount, setPassengerCount] = useState('');
     const [route, setRoute] = useState('');
     const [price, setPrice] = useState('');
@@ -92,6 +90,7 @@ const CreateTrip = () => {
     const [modalMessage, setModalMessage] = useState('');
     const [selectingOrigin, setSelectingOrigin] = useState(false);
     const [directions, setDirections] = useState(null); 
+    const { services, isLoaded, loadError } = useGoogleMaps();
 
     const [showReservationModal, setShowReservationModal] = useState(false);
     const [selectedTrip, setSelectedTrip] = useState(null);
@@ -99,16 +98,33 @@ const CreateTrip = () => {
     const [reservationQuery, setReservationQuery] = useState('');
 
 
-    
+    async function calculateRoute() {
+        const directionsService = new google.maps.DirectionsService()
+        const results = await directionsService.route({
+          origin: origin,
+          destination: destination,
+          // eslint-disable-next-line no-undef
+          travelMode: google.maps.TravelMode.DRIVING,
+        })
+        setDirections(results)
+
+      }
+
+    useEffect(() => {
+        if (origin && destination) {
+            calculateRoute();
+        }
+    }, [origin, destination]);
 
     const handleMapClick = async (event) => {
         const location = {
             lat: event.latLng.lat(),
             lng: event.latLng.lng(),
         };
-    
+        console.log(location);
+
         try {
-            const geocoder = new window.google.maps.Geocoder();
+            const geocoder = services.geocoder;
             geocoder.geocode({ location }, (results, status) => {
                 if (status === 'OK' && results[0]) {
                     const address = results[0].formatted_address;
@@ -132,7 +148,7 @@ const CreateTrip = () => {
     
 
     const fetchSectorFromLocation = async (location) => {
-        const geocoder = new window.google.maps.Geocoder();
+        const geocoder = services.geocoder;
         geocoder.geocode({ location }, (results, status) => {
             if (status === "OK" && results[0]) {
                 const addressComponents = results[0].address_components;

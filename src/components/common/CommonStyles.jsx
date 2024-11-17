@@ -12,6 +12,7 @@ export const Text1 = styled.p`
   margin: 10px;
   color: ${colors.white};
 `;
+
 export const Title = styled.h2`
   text-align: center;
   margin-top: 40px;
@@ -129,6 +130,30 @@ export const StyledAddButton = styled.div`
   }
   bottom: -10px;
   right: -10px;
+`;
+
+export const StyledAddButton1 = styled.div`
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: ${(props) => (props.isHovered ? colors.third : colors.primary)};
+  color: ${colors.white};
+  font-size: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid ${colors.details};
+  box-shadow: ${(props) => 
+    props.isHovered ? 
+      '0px 6px 12px rgba(0, 0, 0, 0.3)' : 
+      '0px 4px 8px rgba(0, 0, 0, 0.2)'
+  };
+  position: absolute;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  &:hover{
+    background-color: ${colors.third};
+  }
 `;
 
 export const Container =styled.div`

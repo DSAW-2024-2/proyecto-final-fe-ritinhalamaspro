@@ -265,6 +265,7 @@ const ProfileInfo = () => {
           <div style={{ textAlign: 'left', padding: '10px 0', color: Colors.details, marginTop: '10px' }}>
             {profileData.plate ? (
               <>
+                <Title>{profileData.plate}</Title>
                 <Text>Capacidad del vehículo: {profileData.capacity || 'Capacidad no disponible'}</Text>
                 <Text>Marca: {profileData.brand || 'Marca no disponible'}</Text>
                 <Text>Modelo: {profileData.model || 'Modelo no disponible'}</Text>

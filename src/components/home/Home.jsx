@@ -1,7 +1,7 @@
 // src/pages/HomePage/HomePage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AiOutlineClockCircle, AiOutlineCloseCircle  } from 'react-icons/ai';
+import { AiOutlineClockCircle, AiOutlineCloseCircle, AiOutlineCheckCircle   } from 'react-icons/ai';
 import styled from 'styled-components';
 import { Container, Text, Input, StyledAddButton, Text1 } from '../../components/common/CommonStyles';
 import colors from '../../assets/Colors';
@@ -9,14 +9,11 @@ import Button from '../common/Button';
 import Loader from '../common/Loader';
 import { useDriver } from '../../context/DriverContext';
 import FeedbackModal from '../common/FeedbackModal';
-import { selectName } from '../../features/users/UserSlice';
+import { selectName, selectUser } from '../../features/users/UserSlice';
 import {useDispatch, useSelector} from "react-redux"
+import { useGoogleMaps } from '../common/GoogleMapsProvider';
 import { GoogleMap, Marker, DirectionsRenderer, Autocomplete, useLoadScript } from '@react-google-maps/api';
 
-
-
-const GOOGLE_MAPS_LIBRARIES = ['places'];
-const apiKey = 'AIzaSyAhrQVoCw36PqqgNMN-AztGhfmqht47ZbI';
 
 // Estilos personalizados
 const MainContainer = styled(Container)`
@@ -94,7 +91,7 @@ const CreateTripCard = styled.div`
     text-align: center;
 `;
 
-const NotificationsContainer = styled.div`
+const NotificationContainer = styled.div`
     background-color: ${colors.primaryHover};
     border-radius: 10px;
     padding: 20px;
@@ -145,6 +142,35 @@ const Overlay = styled.div`
     z-index: 999;
 `;
 
+const LocationCard = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: ${colors.primaryHover};
+    padding: 10px;
+    border-radius: 8px;
+    margin: 5px 0;
+`;
+
+const ButtonContainer = styled.div`
+    display: flex;
+    gap: 10px;
+`;
+
+const ActionButton = styled.button`
+    background: none;
+    border: none;
+    color: ${colors.white};
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+        color: ${colors.third};
+    }
+`;
+
+
 
 const HomePage = () => {
     const { isDriver } = useDriver();
@@ -153,12 +179,14 @@ const HomePage = () => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const id = useSelector(selectName)
+    const universityId = useSelector(selectUser)
 
     const [trips, setTrips] = useState([]);
     const [routeFilter, setRouteFilter] = useState('');
     const [availableSeatsFilter, setAvailableSeatsFilter] = useState('');
     const [filteredTrips, setFilteredTrips] = useState([]);
     const [userName, setUserName] = useState('');
+    const [userUniversityId, setUserUniversityId] = useState('')
 
     const [showReservationModal, setShowReservationModal] = useState(false);
     const [selectedTrip, setSelectedTrip] = useState(null);
@@ -166,13 +194,18 @@ const HomePage = () => {
         seats: '',
         pickupLocation: ''
     });
-    const { isLoaded } = useLoadScript({ googleMapsApiKey: apiKey, libraries: GOOGLE_MAPS_LIBRARIES });
     const [pickupLocation, setPickupLocation] = useState(null);
     const [startAddresses, setStartAddresses] = useState([]);
     const [endAddresses, setEndAddresses] = useState([]);
     const [pickupQuery, setPickupQuery] = useState('');
     const [startPoint, setStartPoint] = useState(null);
     const [endPoint, setEndPoint] = useState(null);
+    const { services, isLoaded, loadError } = useGoogleMaps();
+
+
+    const [driverTrips, setDriverTrips] = useState([]); // Almacena los viajes del conductor
+    const [driverLoading, setDriverLoading] = useState(true); // Estado de carga para los viajes del conductor
+
 
     const [feedbackModal, setFeedbackModal] = useState({
         isOpen: false,
@@ -180,13 +213,85 @@ const HomePage = () => {
         message: '',
         details: ''
     });
+    const [startMarker, setStartMarker] = useState(null);
+    const [endMarker, setEndMarker] = useState(null);
+
+    useEffect(() => {
+        if (selectedTrip) {
+            const newStartMarker = new window.google.maps.Marker({ position: selectedTrip.startPoint });
+            const newEndMarker = new window.google.maps.Marker({ position: selectedTrip.endPoint, icon: { url: 'http://maps.google.com/mapfiles/kml/paddle/go.png' } });
+            setStartMarker(newStartMarker);
+            setEndMarker(newEndMarker);
+        }
+    }, [selectedTrip]);
+
+    useEffect(() => {
+        // ...
+        if (selectedTrip) {
+            if (startMarker) startMarker.setMap(null); // Clear previous marker
+            if (endMarker) endMarker.setMap(null); // Clear previous marker
+            // ... create and set new markers
+        }
+    }, [selectedTrip]);
 
     
     useEffect(() => {
+
+        const fetchTrips = async (universityID) => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/all', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+        
+                if (!response.ok) throw new Error("Error al obtener los viajes");
+                console.log(data.trips);
+
+                const data = await response.json();
+                console.log("Datos de viajes:", data);
+        
+                // Filtrar viajes no creados por el usuario logueado y con status: 0
+                const filteredTrips = data.trips
+                    .filter(trip => trip.userId !== universityID )
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Ordenar por fecha de creación
+        
+                // Extraer direcciones de inicio y fin para mostrar
+                const addressPromises = filteredTrips.map(trip =>
+                    getDetailAddress(trip.startPoint.lat, trip.startPoint.lng)
+                );
+                const endAddressPromises = filteredTrips.map(trip =>
+                    getDetailAddress(trip.endPoint.lat, trip.endPoint.lng)
+                );
+        
+                const resolvedAddresses = await Promise.all(addressPromises);
+                const resolvedEndAddresses = await Promise.all(endAddressPromises);
+        
+                setStartAddresses(resolvedAddresses);
+                setEndAddresses(resolvedEndAddresses);
+                setTrips(filteredTrips);
+                setFilteredTrips(filteredTrips);
+        
+            } catch (error) {
+                console.error("Error al obtener los viajes:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
         setTimeout(() => {
             setUserName(id)
+            setUserUniversityId(universityId)
+            console.log("Nombre de usuario:", universityId);
+
+            
         }, 1000);
-    }, [id]);
+
+        if(universityId !== null)
+            console.log("Universidad del usuario:", universityId);
+            fetchTrips(universityId);
+    }, [id, universityId]);
 
     useEffect(() => {
         if (selectedTrip) {
@@ -197,6 +302,49 @@ const HomePage = () => {
 
 
 
+    const handleRequestAction = async (userId, action) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!userId) {
+                console.error('El userId no está definido');
+                return;
+            }
+    
+            const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/manage-reservation', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    tripId: selectedTrip?.tripId,
+                    userId,
+                    action,
+                }),
+            });
+    
+            if (!response.ok) {
+                console.error(`Error al ${action} la solicitud:`, response.statusText);
+                return;
+            }
+    
+            console.log(`Solicitud ${action} correctamente para el usuario ${userId}`);
+            // Actualiza el estado local para reflejar el cambio
+            const updatedTrips = driverTrips.map((trip) =>
+                trip.tripId === selectedTrip?.tripId
+                    ? {
+                          ...trip,
+                          pendingRequests: trip.pendingRequests.filter((request) => request.userId !== userId),
+                      }
+                    : trip
+            );
+            setDriverTrips(updatedTrips);
+        } catch (error) {
+            console.error(`Error al ${action} la solicitud:`, error);
+        }
+    };
+    
+
     useEffect(() => {
         // Intento de obtener el nombre del usuario desde localStorage
         const storedUsername = localStorage.getItem('username');
@@ -205,49 +353,52 @@ const HomePage = () => {
         if (storedUserId) setUserId(storedUserId);
     }, []);
 
+
     useEffect(() => {
-        const fetchTrips = async () => {
+        const fetchTripsDriver = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/all', {
+                const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/my-trips', {
                     headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                        Authorization: `Bearer ${token}`,
+                    },
                 });
-    
-                if (!response.ok) throw new Error("Error al obtener los viajes");
-
+        
+                if (!response.ok) throw new Error('Error al obtener los viajes creados');
+        
                 const data = await response.json();
-                console.log("Datos de viajes:", data);
-
-                const addressPromises = data.trips.map(trip =>
-                    getDetailAddress(trip.startPoint.lat, trip.startPoint.lng)
-                );
-                const endAddressPromises = data.trips.map(trip =>
-                    getDetailAddress(trip.endPoint.lat, trip.endPoint.lng)
-                );
-    
-                const resolvedAddresses = await Promise.all(addressPromises);
-                const resolvedEndAddresses = await Promise.all(endAddressPromises);
-                setStartAddresses(resolvedAddresses);
-                setEndAddresses(resolvedEndAddresses);
-                console.log("Direcciones resueltas:", resolvedAddresses);
-
-                setTrips(data.trips || []);
-                setFilteredTrips(data.trips || []);
+                console.log("Viajes creados por el conductor:", data);
+        
+                // Procesar los datos del conductor si es necesario
+                const driverTrips = data.myTrips.map(trip => ({
+                    tripId: trip.tripId,
+                    sector: trip.sector,
+                    departureTime: trip.departureTime,
+                    date: trip.date,
+                    price: trip.price,
+                    pendingRequests: trip.pendingRequests || [],
+                }));
+        
+                setDriverTrips(driverTrips); // Usa un estado separado para los viajes del conductor
             } catch (error) {
-                console.error("Error al obtener los viajes:", error);
+                console.error("Error al obtener los viajes creados por el conductor:", error);
             } finally {
-                setLoading(false);
+                setDriverLoading(false); // Usa un estado separado para el loading del conductor
             }
         };
-    
-        fetchTrips();
+
+        fetchTripsDriver();
     }, []);
+
+    
 
     const handleShowTripDetails = (trip) => {
         setSelectedTrip(trip);
-        setShowReservationModal(true);
+
+        setTimeout(() => {
+            setShowReservationModal(true);
+
+        }, 500);
     };
 
     const handleMapClick = (event) => {
@@ -258,7 +409,7 @@ const HomePage = () => {
         setPickupLocation(location);
         setReservationDetails({ ...reservationDetails, pickupLocation: `Lat: ${location.lat.toFixed(4)}, Lng: ${location.lng.toFixed(4)}` });
         try {
-            const geocoder = new window.google.maps.Geocoder();
+            const geocoder = services.geocoder;
             geocoder.geocode({ location }, (results, status) => {
                 if (status === 'OK' && results[0]) {
                     const address = results[0].formatted_address;
@@ -278,11 +429,12 @@ const HomePage = () => {
     };
 
      const fitBounds = (map) => {
-        const bounds = new window.google.maps.LatLngBounds();
+        const bounds = services.bounds;
         if (startPoint) bounds.extend(startPoint);
         if (endPoint) bounds.extend(endPoint);
         if (pickupLocation) bounds.extend(pickupLocation);
         map.fitBounds(bounds);
+        console.log(startPoint, endPoint, pickupLocation);
     };
 
     const handleMapLoad = (map) => {
@@ -290,16 +442,75 @@ const HomePage = () => {
     };
     
     
-    const applyFilters = () => {
-        const filtered = trips.filter((trip) => {
-            return (
-                (!routeFilter || trip.route.toLowerCase().includes(routeFilter.toLowerCase())) &&
-                (!availableSeatsFilter || trip.availablePlaces >= parseInt(availableSeatsFilter))
+    const [sectors, setSectors] = useState([]); // Lista de sectores únicos
+const [selectedSector, setSelectedSector] = useState(''); // Sector seleccionado
+
+useEffect(() => {
+    const fetchTrips = async (universityID) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/all', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) throw new Error("Error al obtener los viajes");
+
+            const data = await response.json();
+            console.log("Datos de viajes:", data);
+
+            // Extrae todos los sectores únicos
+            const uniqueSectors = [...new Set(data.trips.map(trip => trip.sector))];
+            setSectors(uniqueSectors);
+
+            const addressPromises = data.trips.map(trip =>
+                getDetailAddress(trip.startPoint.lat, trip.startPoint.lng)
             );
-        });
-        setFilteredTrips(filtered);
+            const endAddressPromises = data.trips.map(trip =>
+                getDetailAddress(trip.endPoint.lat, trip.endPoint.lng)
+            );
+
+            const resolvedAddresses = await Promise.all(addressPromises);
+            const resolvedEndAddresses = await Promise.all(endAddressPromises);
+            setStartAddresses(resolvedAddresses);
+            setEndAddresses(resolvedEndAddresses);
+
+            const filteredTrips = data.trips.filter(trip => trip.userId !== universityID);
+            setTrips(filteredTrips);
+            setFilteredTrips(filteredTrips);
+
+        } catch (error) {
+            console.error("Error al obtener los viajes:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
+    setTimeout(() => {
+        setUserName(id);
+        setUserUniversityId(universityId);
+        console.log("Nombre de usuario:", universityId);
+    }, 1000);
+
+    if (universityId !== null) {
+        console.log("Universidad del usuario:", universityId);
+        fetchTrips(universityId);
+    }
+}, [id, universityId]);
+
+const applyFilters = () => {
+    const filtered = trips.filter((trip) => {
+        return (
+            (!selectedSector || trip.sector === selectedSector) &&
+            (!availableSeatsFilter || trip.availablePlaces >= parseInt(availableSeatsFilter, 10))
+        );
+    });
+    setFilteredTrips(filtered);
+};
+
+    
+    
     const handleCreateTrip = () => {
         navigate('/create-trip');
     };
@@ -357,7 +568,7 @@ const HomePage = () => {
     
     const getDetailAddress = (lat, lng) => {
         return new Promise((resolve, reject) => {
-            const geocoder = new window.google.maps.Geocoder();
+            const geocoder = services.geocoder;
             const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
     
             geocoder.geocode({ location: latlng }, (results, status) => {
@@ -410,23 +621,40 @@ const HomePage = () => {
             {!isDriver && (
                 <>
                     <FilterContainer>
-                        <Input 
-                            placeholder="Filtrar por Ruta" 
-                            value={routeFilter} 
-                            onChange={(e) => setRouteFilter(e.target.value)} 
-                        />
-                        <Input 
-                            placeholder="Filtrar por Cantidad de Puestos Disponibles" 
-                            value={availableSeatsFilter} 
-                            onChange={(e) => setAvailableSeatsFilter(e.target.value)} 
-                            type="number"
-                        />
-                        <Button 
-                            label="Aplicar Filtros" 
-                            primary 
-                            onClick={applyFilters} 
-                        />
-                    </FilterContainer>
+                    <Input
+                        as="select" // Usamos `as="select"` para mantener el estilo del componente Input
+                        placeholder="Filtrar por Sector de Inicio de Viaje"
+                        value={selectedSector}
+                        onChange={(e) => setSelectedSector(e.target.value)}
+                        
+                    >
+                        <option value="">Todos los sectores</option>
+                        {sectors.map((sector, index) => (
+                            <option key={index} value={sector}>
+                                {sector}
+                            </option>
+                        ))}
+                    </Input>
+
+                    <Input 
+                        placeholder="Filtrar por Cantidad de Puestos Disponibles" 
+                        value={availableSeatsFilter} 
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (!value || parseInt(value, 10) >= 1) {
+                                setAvailableSeatsFilter(value);
+                            } 
+                        }}
+                        type="number"
+                    />
+
+                    <Button 
+                        label="Aplicar Filtros" 
+                        primary 
+                        onClick={applyFilters} 
+                    />
+                </FilterContainer>
+
 
                     <ScrollableCardContainer>
     {filteredTrips.length > 0 ? (
@@ -445,6 +673,8 @@ const HomePage = () => {
                         }}
                     />
                 )}
+                <Title>{trip.sector}</Title> 
+
                 <Text1>
                     De: {startAddresses[index] || 'Dirección no encontrada'}
                 </Text1>
@@ -455,7 +685,7 @@ const HomePage = () => {
                     <Text1>Hora de salida: {trip.departureTime || 'No especificada'}</Text1>
                 </TimeContainer>
                 <Text1>Precio/persona: ${trip.price || 'No especificado'}</Text1>
-                <Text1>Cupos Disponibles: {trip.availability|| '0'}</Text1>
+                <Text1>Cupos Disponibles: {trip.capacity || 'No especificado'}</Text1>
                 <StyledAddButton onClick={() => handleShowTripDetails(trip)}>+</StyledAddButton>
             </TripCard>
         ))
@@ -522,6 +752,12 @@ const HomePage = () => {
                                 }}
                             />
                         )}
+                        {selectedTrip && (
+                            <>
+                                {startMarker && startMarker.setMap(null)}
+                                {endMarker && endMarker.setMap(null)}
+                            </>
+                        )}
                     </GoogleMap>
                 ) : (
                     <Loader />
@@ -568,26 +804,57 @@ const HomePage = () => {
 
             {isDriver && (
                 <DriverContainer>
-                    <CreateTripCard onClick={handleCreateTrip}>
-                        <Text style={{ fontWeight: 'bold' }}>Crea un viaje</Text>
-                        <Button primary label="+" />
-                    </CreateTripCard>
-
-                    <NotificationsContainer>
-                        <Title style={{ textAlign: 'left' }}>Notificaciones</Title>
-                        <NotificationCard>
-                            <Text style={{ fontWeight: 'bold' }}>Cancelación de Reserva</Text>
-                            <Text>Canceló <span style={{ color: colors.third }}>1</span> puesto</Text>
-                            <Text>Diego Gomez</Text>
-                        </NotificationCard>
-                        <NotificationCard>
-                            <Text style={{ fontWeight: 'bold' }}>Reserva</Text>
-                            <Text>Punto de Recogida: Calle 134</Text>
-                            <Text>Reservó <span style={{ color: colors.third }}>2</span> puestos</Text>
-                            <Text>Diego Gomez</Text>
-                        </NotificationCard>
-                    </NotificationsContainer>
-                </DriverContainer>
+                <CreateTripCard onClick={() => navigate('/create-trip')}>
+                    <Text style={{ fontWeight: 'bold' }}>Crea un viaje</Text>
+                    <Button primary label="+" />
+                </CreateTripCard>
+    
+                {isDriver && (
+                    <NotificationContainer>
+                    <Title>Notificaciones</Title>
+                    {driverTrips.length > 0 ? (
+                        driverTrips.map((trip, index) => (
+                            <NotificationCard key={index}>
+                                <Text1 style={{ fontWeight: 'bold' }}>{trip.sector}</Text1>
+                                <TimeContainer>
+                                    <AiOutlineClockCircle size={16} />
+                                    <span>{trip.departureTime || 'Hora no especificada'}</span>
+                                </TimeContainer>
+                                <Text1>Fecha: {trip.date || 'Fecha no especificada'}</Text1>
+                                <Text1>Precio: ${trip.price || 'No especificado'}</Text1>
+                                <Text1>Solicitudes de Recogida:</Text1>
+                                {trip.pendingRequests.length > 0 ? (
+                                    trip.pendingRequests.map((request, idx) => (
+                                        <LocationCard key={idx}>
+                                            <Text1>{request.location || 'Ubicación no especificada'}</Text1>
+                                            <ButtonContainer>
+                                                <ActionButton onClick={() => handleRequestAction(request.userId, 'accept')}>
+                                                    <AiOutlineCheckCircle size={20} />
+                                                </ActionButton>
+                                                <ActionButton onClick={() => handleRequestAction(request.userId, 'reject')}>
+                                                    <AiOutlineCloseCircle size={20} />
+                                                </ActionButton>
+                                            </ButtonContainer>
+                                        </LocationCard>
+                                    ))
+                                ) : (
+                                    <Text1>Sin solicitudes pendientes</Text1>
+                                )}
+                            </NotificationCard>
+                        ))
+                    ) : (
+                        <Text>No hay notificaciones</Text>
+                    )}
+                    <Button
+                        label="Ver más"
+                        primary
+                        onClick={() => navigate('/created-trips')}
+                        style={{ marginTop: '20px' }}
+                    />
+                </NotificationContainer>
+                
+                )}
+            </DriverContainer>
             )}
 
             {feedbackModal.isOpen && (

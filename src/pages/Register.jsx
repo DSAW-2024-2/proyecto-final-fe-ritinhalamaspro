@@ -10,7 +10,8 @@ import FeedbackModal from '../components/common/FeedbackModal';
 import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import { CardContainer, Container, FormLogin, Input, InputContainer, LinkStyle, PasswordConatiner, StyledAddButton, Text, Title } from '../components/common/CommonStyles';
+import { CardContainer, Container, FormLogin, Input, InputContainer, LinkStyle, PasswordConatiner, StyledAddButton, StyledAddButton1, Text, Title } from '../components/common/CommonStyles';
+import emailjs from '@emailjs/browser';
 
 const Register = () => {
   const [steps, setSteps] = useState(1); // Variable para controlar los pasos
@@ -53,6 +54,35 @@ const Register = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     navigate('/iniciar-sesion');
+  };
+
+  const sendWelcomeEmail = (email, name) => {
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      console.error('La dirección de correo electrónico es inválida o está vacía.');
+      return;
+    }
+  
+    const templateParams = {
+      to_name: name,
+      to_email: email,
+      from_name: 'MoveU',
+    };
+  
+    emailjs
+      .send(
+        import.meta.env.VITE_API_SERVICE_ID,
+        import.meta.env.VITE_TEMPLATE_ID,
+        templateParams,
+        import.meta.env.VITE_API_KEY_EMAILJS
+      )
+      .then(
+        (response) => {
+          console.log('Correo enviado exitosamente:', response.status, response.text);
+        },
+        (error) => {
+          console.error('Error al enviar el correo:', error);
+        }
+      );
   };
 
   // Función para validar los campos
@@ -181,7 +211,7 @@ const Register = () => {
         // Guardar el token en localStorage
         const token = response.data.token;
         localStorage.setItem('token', token); // Guardar token
-        
+        sendWelcomeEmail(email, name); // Enviar correo de bienvenida
         setSteps(3); // Cambiar al paso 3 después del registro exitoso
       }
     } catch (error) {
@@ -409,7 +439,7 @@ const Register = () => {
                       cursor: 'pointer',
                     }}
                   >
-                    <StyledAddButton>+</StyledAddButton>
+                    <StyledAddButton1>+</StyledAddButton1>
                   </button>
                 </div>
               </div>

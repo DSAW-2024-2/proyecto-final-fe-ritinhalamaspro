@@ -9,11 +9,10 @@ import { AiOutlineDelete, AiOutlineUser, AiOutlineCloseCircle } from 'react-icon
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import { GoogleMap, Marker, DirectionsRenderer, Autocomplete, useLoadScript } from '@react-google-maps/api';
+import { useGoogleMaps } from '../common/GoogleMapsProvider';
+import { useNavigate } from 'react-router-dom';
 
 
-
-const GOOGLE_MAPS_LIBRARIES = ['places'];
-const apiKey = 'AIzaSyAhrQVoCw36PqqgNMN-AztGhfmqht47ZbI';
 
 const Container = styled.div`
     display: flex;
@@ -157,14 +156,69 @@ const CreatedTrips = () => {
     const [selectedTrip, setSelectedTrip] = useState(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const { isLoaded } = useLoadScript({ googleMapsApiKey: apiKey, libraries: GOOGLE_MAPS_LIBRARIES });
+    const [loading, setLoading] = useState(true);  
     const [startAddress, setStartAddress] = useState('');
     const [endAddress, setEndAddress] = useState('');
     const [pendingRequest, setPendingRequest] = useState([]);
+    const [directions, setDirections] = useState(null);
+    const [waypoints, setWaypoints] = useState([]);
+    const [mapInstance, setMapInstance] = useState(null);
+    const [startPoint, setStartPoint] = useState(null);
+    const [endPoint, setEndPoint] = useState(null);
+    const [showMap, setShowMap] = useState(false);
+
+    const [map, setMap] = useState(/** @type google.maps.Map */ (null))
+    const [directionsResponse, setDirectionsResponse] = useState(null)
+    const [distance, setDistance] = useState('')
+    const [duration, setDuration] = useState('')
+    const { services, isLoaded, loadError } = useGoogleMaps();
+    const [forceRender, setForceRender] = useState(0);
+
+    const navigate = useNavigate(); // Usa useNavigate para obtener la función navigate
+
+
+    const [feedbackModal, setFeedbackModal] = useState({ // Define el estado del modal aquí
+        isOpen: false,
+        type: '',
+        message: '',
+        details: '',
+        onConfirm: null,
+        onClose: null,
+    });
+
+    const triggerReRender = () => {
+        setForceRender((prev) => prev + 1); // Cambiar el estado forzará el re-render
+    };
+
+    const getCoordinatesFromAddress = (address) => {
+        return new Promise((resolve, reject) => {
+            if (!window.google || !window.google.maps) {
+                reject("Google Maps JavaScript API no está cargada");
+                return;
+            }
+    
+            const geocoder = services.geocoder;
+    
+            geocoder.geocode({ address }, (results, status) => {
+                if (status === "OK" && results[0]) {
+                    const location = results[0].geometry.location;
+                    resolve({
+                        lat: location.lat(),
+                        lng: location.lng(),
+                    });
+                } else {
+                    reject(`No se pudo geocodificar la dirección. Status: ${status}`);
+                }
+            });
+        });
+    };
+
+
+
     
 
     useEffect(() => {
+        console.log('API Key:', import.meta.env.VITE_API_KEY);
         const fetchTrips = async () => {
             try {
                 const token = localStorage.getItem('token');
@@ -188,19 +242,48 @@ const CreatedTrips = () => {
         fetchTrips();
     }, []);
 
-    const handleTripClick = async(trip) => {
+    const handleTripClick = async (trip) => {
         console.log(trip);
         setSelectedTrip(trip);
-        if (trip.pendingRequests)
-        {
+     
+        if (trip.pendingRequests) {
             setPendingRequest(trip.pendingRequests);
         }
-        
-        setShowDetailsModal(true);
-        const addressPromise = await getDetailAddress(trip.startPoint.lat, trip.startPoint.lng)
-        const endAddressPromise = await getDetailAddress(trip.endPoint.lat, trip.endPoint.lng)
+
+        if (trip.acceptedRequests) {
+
+            const processRequests = async () => {
+                try {
+                    // Iterar sobre cada solicitud y convertir direcciones a coordenadas
+                    const waypoints = await Promise.all(
+                        trip.acceptedRequests.map(async (request) => {
+                            const coordinates = await getCoordinatesFromAddress(request.location);
+                            console.log(coordinates);
+                            return { location: coordinates, stopover: true }; // Crear un waypoint
+                        })
+                    );
+     
+                    // Establecer los waypoints convertidos
+                    setWaypoints(waypoints);
+                } catch (error) {
+                    console.error("Error al procesar solicitudes aceptadas:", error);
+                }
+            };
+
+            processRequests();
+        }
+        // Cálculo de la ruta usando startPoint y endPoint
+        else {
+            console.error("Punto de inicio o final no definido en el viaje");
+        }
+     
+        // Obtener direcciones formateadas para mostrar
+        const addressPromise = await getDetailAddress(trip.startPoint.lat, trip.startPoint.lng);
+        const endAddressPromise = await getDetailAddress(trip.endPoint.lat, trip.endPoint.lng);
         setStartAddress(addressPromise);
         setEndAddress(endAddressPromise);
+     
+        setShowDetailsModal(true);
     };
 
     const handleDeleteClick = (trip) => {
@@ -209,6 +292,47 @@ const CreatedTrips = () => {
     };
 
     const handleStartTrip = async () => {
+        // Mostrar el modal de confirmación
+        setFeedbackModal({
+            isOpen: true,
+            type: 'question',
+            message: '¿Deseas iniciar este viaje?',
+            details: 'Esta acción cambiará el estado del viaje a "en curso".',
+            onConfirm: async () => {
+                // Realizar la actualización del estado del viaje
+                try {
+                    const token = localStorage.getItem('token');
+                    if (!token) throw new Error("Token no encontrado. Por favor, inicia sesión.");
+    
+                    const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/update-state', {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            tripId: selectedTrip?.tripId, // Asegúrate de que `selectedTrip` contiene el tripId
+                            newState: 1, // Estado "en curso"
+                        }),
+                    });
+    
+                    if (!response.ok) throw new Error("Error al actualizar el estado del viaje");
+    
+                    // Navegar a la página de viajes en curso
+                    navigate('/trips-progress-driver');
+    
+                } catch (error) {
+                    console.error("Error al iniciar el viaje:", error);
+                    setFeedbackModal({
+                        isOpen: true,
+                        type: 'error',
+                        message: 'Error al iniciar el viaje',
+                        details: error.message || 'Hubo un problema al iniciar el viaje. Inténtalo nuevamente.',
+                    });
+                }
+            },
+            onClose: () => setFeedbackModal({ isOpen: false }), // Cerrar el modal si se cancela
+        });
     };
 
     const confirmDeleteTrip = async () => {
@@ -252,7 +376,7 @@ const CreatedTrips = () => {
 
     const getDetailAddress = async(lat, lng) => {
         return new Promise((resolve, reject) => {
-            const geocoder = new window.google.maps.Geocoder();
+            const geocoder = services.geocoder;
             const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
     
             geocoder.geocode({ location: latlng }, (results, status) => {
@@ -265,6 +389,77 @@ const CreatedTrips = () => {
             });
         });
     };
+
+    const fitBounds = (map) => {
+        if (!map || !startPoint || !endPoint) return; // Verifica que los datos existan
+    
+        const bounds = services.bounds;
+    
+        bounds.extend(new window.google.maps.LatLng(startPoint.lat, startPoint.lng));
+        bounds.extend(new window.google.maps.LatLng(endPoint.lat, endPoint.lng));
+    
+        waypoints.forEach((waypoint) => {
+            if (waypoint.location) {
+                bounds.extend(new window.google.maps.LatLng(waypoint.location.lat, waypoint.location.lng));
+            }
+        });
+    
+        map.fitBounds(bounds);
+    };
+
+    const handleMapLoad = (map) => {
+        if (!window.mapRef) {
+            window.mapRef = map;
+            setMap(map);
+            fitBounds(map);
+        }
+    };
+
+    useEffect(() => {
+        console.log('Selected Trip:', selectedTrip);
+        if (selectedTrip) {
+        window.mapRef = map;
+
+        setMap(map);
+        setLocations(selectedTrip.startPoint, setStartPoint);
+        setLocations(selectedTrip.endPoint, setEndPoint);
+        calculateRoute();
+        fitBounds(map);
+
+        }
+    }, [map, selectedTrip, showMap]);
+
+    const setLocations = async (location, set) => {
+        try {
+            const geocoder = services.geocoder;
+            geocoder.geocode({ location }, (results, status) => {
+                if (status === 'OK' && results[0]) {
+                    console.log('Dirección:', results[0]);
+                    set(results[0].geometry.location);
+                } else {
+                    console.error('Error al obtener la dirección:', status);
+                }
+            });
+        } catch (error) {
+            console.error('Error con el servicio de geocodificación:', error);
+        }
+
+    };
+
+    async function calculateRoute() {
+        const directionsService = new google.maps.DirectionsService();
+        const results = await directionsService.route({
+            origin: startAddress,
+            destination: endAddress,
+            waypoints: waypoints,
+            optimizeWaypoints: true,
+            travelMode: google.maps.TravelMode.DRIVING,
+        });
+        setDirections(results);
+        setDistance(results.routes[0].legs[0].distance.text);
+        setDuration(results.routes[0].legs[0].duration.text);
+    }
+
 
     const handleRequestAction = async (userId, action) => {
         try {
@@ -305,8 +500,6 @@ const CreatedTrips = () => {
             console.error(`Error al ${action} la solicitud:`, error);
         }
     };
-    
-    
 
     if (loading) {
         return <Loader />;
@@ -339,7 +532,7 @@ const CreatedTrips = () => {
                                 </TripInfo>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                                     <AiOutlineUser size={16} />
-                                    <Text1>{trip.reservations ? trip.reservations.length : 0} Reservas</Text1>
+                                    <Text1>{trip.reservationsCount} Reservas</Text1>
                                 </div>
                             </TripCard>
                         ))
@@ -356,54 +549,16 @@ const CreatedTrips = () => {
 
                         <StyledTabs>
                             <TabList>
-                            <Tab>Viaje</Tab>
-                            <Tab>Solicitudes</Tab>
-                            <Tab>Ruta</Tab>
+                            <Tab onClick={() => {setShowMap(false)
+                            }}>Viaje</Tab>
+                            <Tab onClick={() => {setShowMap(false)
+                            }}>Solicitudes</Tab>
+                            <Tab onClick={() => {setShowMap(true)
+                            setStartAddress(startAddress)}}>Ruta</Tab>
                             </TabList>
 
                             <TabPanel>
-                                
-                                <Title>{selectedTrip.sector}</Title>
-                                <ContentContainer>
-                                    <Text1>
-                                        Desde:{startAddress}
-                                    </Text1>
-                                    <Text1>
-                                        Hasta:{endAddress}
-                                    </Text1>
-                                    <Text1>Hora de salida: {selectedTrip.departureTime}</Text1>
-                                    <Text1>Precio /persona: ${selectedTrip.price}</Text1>
-                                    <Text1>Reservas: {selectedTrip.reservations?.length || 0}</Text1>
-                                </ContentContainer>                              
-                                <ButtonContainer>
-                                    <Button label="Iniciar Viaje" primary onClick={handleStartTrip} />
-                                </ButtonContainer>
-                                </TabPanel>
-                                <TabPanel>
-                                    <Title>Solicitudes</Title>
-                                    {pendingRequest.length > 0 ? (
-                                        pendingRequest.map((request) => (
-                                            <RequestContainer key={request.userId}>
-                                                <Text1>{request.location}</Text1>
-                                                <Button
-                                                    label="Aceptar"
-                                                    primary
-                                                    onClick={() => handleRequestAction(request.userId, 'accept')}
-                                                />
-                                                <Button
-                                                    label="Rechazar"
-                                                    onClick={() => handleRequestAction(request.userId, 'reject')}
-                                                />
-                                            </RequestContainer>
-                                        ))
-                                    ) : (
-                                        <Text>No hay solicitudes pendientes</Text>
-                                    )}
-                                </TabPanel>
-
-
-                        </StyledTabs>
-                        <AiOutlineCloseCircle
+                                <AiOutlineCloseCircle
                                     size={24}
                                     color={colors.white}
                                     style={{
@@ -414,10 +569,72 @@ const CreatedTrips = () => {
                                     }}
                                     onClick={() => closeModals()}
                                 />
+                                <Title>{selectedTrip.sector}</Title>
+                                <ContentContainer>
+                                    <Text1>
+                                        Desde:{startAddress}
+                                    </Text1>
+                                    <Text1>
+                                        Hasta:{endAddress}
+                                    </Text1>
+                                    <Text1>Hora de salida: {selectedTrip.departureTime}</Text1>
+                                    <Text1>Precio /persona: ${selectedTrip.price}</Text1>
+                                    <Text1>Reservas: {selectedTrip.reservationsCount || 0}</Text1>
+                                </ContentContainer>                              
+                                <ButtonContainer>
+                                    <Button label="Iniciar Viaje" primary onClick={handleStartTrip} />
+                                </ButtonContainer>
+                                </TabPanel>
+                                <TabPanel>
+                                <Title>Solicitudes</Title>
+                                    {pendingRequest.length > 0 ? (
+                                        pendingRequest.map((request) => (
+                                            <RequestContainer key={request.userId}>
+                                                <Text1>{request.location}</Text1>
+                                                <Button label="Aceptar" primary onClick={() => handleRequestAction(request.userId, "accept")}/>
+                                                <Button label="Rechazar" onClick={() => handleRequestAction(request.userId, "reject")} />
+                                            </RequestContainer>
+                                        ))
+                                    ) : (
+                                        <Text>No hay solicitudes pendientes</Text>
+                                    )}
+                            </TabPanel>
+                            <TabPanel>
+                                <Title>Ruta</Title>
+                                {showMap && (
+
+                                    <>
+                                    <GoogleMap
+                                        mapContainerStyle={{ width: '100%', height: '400px' }}
+                                        center={startPoint || { lat: 4.7325735, lng: -74.0563375 }}
+                                        zoom={10}
+                                        >
+                                        {startPoint && <Marker position={startPoint} />}
+                                        {endPoint && <Marker position={endPoint} />}
+                                        {directions && <DirectionsRenderer directions={directions} />}
+                                    </GoogleMap>
+                                    <Text> <span style={{ color: colors.third }}>Distancia:</span> {distance}, <span style={{ color: colors.third }}>Duración:</span> {duration}</Text>
+                                    
+                                    </>
+                                                                        )}
+
+                            </TabPanel>
+                        </StyledTabs>
                     </DetailsModal>
 
                 </>
             )}
+
+        {feedbackModal.isOpen && (
+            <FeedbackModal
+                type={feedbackModal.type}
+                message={feedbackModal.message}
+                details={feedbackModal.details}
+                onConfirm={feedbackModal.onConfirm} // Acción al confirmar
+                onClose={feedbackModal.onClose}   // Acción al cerrar
+            />
+        )}
+
 
             {showDeleteModal && (
                 <FeedbackModal

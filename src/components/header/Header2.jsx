@@ -74,7 +74,7 @@ const CenterContainer = styled.div`
 `;
 
 const Logo = styled.img`
-    width: ${({ isOpen }) => (isOpen ? '120px' : '30px')};
+    width: ${({ isOpen }) => (isOpen ? '120px' : '25px')};
     margin-top: 1em;
     height: auto;
     transition: width 0.3s ease, opacity 0.3s ease;
@@ -161,7 +161,8 @@ function Header2() {
   const verifyIsDriver = async () => {
       const token = localStorage.getItem('token');
       try {
-          const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/cars/me', {
+         const url = `${import.meta.env.VITE_API_URL}/cars/me`;
+          const response = await fetch(url , {
               method: 'GET',
               headers: {
                   'Authorization': `Bearer ${token}`,
@@ -187,7 +188,7 @@ function Header2() {
   const fetchProfileData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const endpoint = 'https://proyecto-final-be-ritinhalamaspro.vercel.app/users/me'
+      const endpoint = `${import.meta.env.VITE_API_URL}/users/me`
       
       const response = await fetch(endpoint, {
           method: 'GET',
@@ -200,10 +201,9 @@ function Header2() {
         if (!response.ok) throw new Error('Error al obtener los datos del perfil');
         
         let data = await response.json();
-
         dispatch(setUserLogin({
             name: data.name,
-            id: data.id,
+            id: data.universityID,
             token: token,
             photo: data.photoURL,            
         }));
@@ -326,11 +326,11 @@ function Header2() {
                           active={path === (isDriver ? '/created-trips' : '/reserved-trips')}
                       />
                       </NavbarItem>
-                      <NavbarItem onClick={() => navigate('/current-trips')}>
+                      <NavbarItem onClick={() =>history (isDriver ? '/trips-progress-driver' : '/trips-progress')}>
                       <Icon 
                                 icon={faRoad} 
                                 isDriver={isDriver} 
-                                active={path === '/current-trips'} 
+                                active={path === (isDriver ? '/trips-progress-driver' : '/trips-progress')}
                             />
                       </NavbarItem>
                       </NavbarList>
@@ -350,11 +350,12 @@ function Header2() {
                       />
                         <NavbarItemText active={headerOpen}>{isDriver ? 'Viajes Creados' : 'Viajes Reservados'}</NavbarItemText>
                       </NavbarItemComplete>
-                      <NavbarItemComplete onClick={() => history('/current-trips')}>
+                      <NavbarItemComplete onClick={() => history('/trips-progress-driver')}>
                       <Icon 
                                 icon={faRoad} 
                                 isDriver={isDriver} 
-                                active={path === '/current-trips'} 
+                                active={path === (isDriver ? '/trips-progress-driver' : '/trips-progress')}
+                                
                             />                  
                         <NavbarItemText active={headerOpen}>Viajes en curso</NavbarItemText>
                       </NavbarItemComplete>

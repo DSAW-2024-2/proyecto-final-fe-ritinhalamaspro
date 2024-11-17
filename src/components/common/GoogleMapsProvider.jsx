@@ -1,15 +1,38 @@
-// src/components/GoogleMapsProvider.jsx
-import React from 'react';
-import { LoadScript } from '@react-google-maps/api';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useLoadScript } from '@react-google-maps/api';
 
-const apiKey = 'YOUR_GOOGLE_MAPS_API_KEY';
+const GoogleMapsContext = createContext();
 
-const GoogleMapsProvider = ({ children }) => {
+export const GoogleMapsProvider = ({ children }) => {
+    const { isLoaded, loadError } = useLoadScript({
+        googleMapsApiKey: import.meta.env.VITE_API_KEY,
+        libraries: ['places', 'geometry', 'directions'],
+    });
+
+    const [services, setServices] = useState({
+        geocoder: null,
+        directionsService: null,
+        placesService: null,
+    });
+
+    useEffect(() => {
+        if (isLoaded) {
+            setServices({
+                geocoder: new window.google.maps.Geocoder(),
+                directionsService: new window.google.maps.DirectionsService(),
+                placesService: new window.google.maps.places.PlacesService(document.createElement('div')),
+                bounds: new window.google.maps.LatLngBounds(),
+            });
+        }
+    }, [isLoaded]);
+
     return (
-        <LoadScript googleMapsApiKey={apiKey} libraries={['places']}>
+        <GoogleMapsContext.Provider value={{ services, isLoaded, loadError }}>
             {children}
-        </LoadScript>
+        </GoogleMapsContext.Provider>
     );
 };
 
-export default GoogleMapsProvider;
+export const useGoogleMaps = () => {
+    return useContext(GoogleMapsContext);
+};

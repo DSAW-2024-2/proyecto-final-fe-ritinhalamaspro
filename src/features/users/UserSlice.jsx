@@ -39,7 +39,7 @@ const userSlice = createSlice({
 
 export const { setId, setName, setToken, clearUser, setUserLogin } = userSlice.actions;
 
-export const selectUser = (state) => state.user.user;
+export const selectUser = (state) => state.user.id;
 export const selectName = (state) => state.user.name;
 export const selectToken = (state) => state.user.token;
 export const selectPhoto = (state) => state.user.photo;
