@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AiOutlineClockCircle, AiOutlineCloseCircle  } from 'react-icons/ai';
 import styled from 'styled-components';
-import { Container, Text, Input, StyledAddButton } from '../../components/common/CommonStyles';
+import { Container, Text, Input, StyledAddButton, Text1 } from '../../components/common/CommonStyles';
 import colors from '../../assets/Colors';
 import Button from '../common/Button';
 import Loader from '../common/Loader';
@@ -67,7 +67,7 @@ const TripCard = styled.div`
     position: relative;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
 `;
 
 const DriverContainer = styled.div`
@@ -168,7 +168,8 @@ const HomePage = () => {
     });
     const { isLoaded } = useLoadScript({ googleMapsApiKey: apiKey, libraries: GOOGLE_MAPS_LIBRARIES });
     const [pickupLocation, setPickupLocation] = useState(null);
-
+    const [startAddresses, setStartAddresses] = useState([]);
+    const [endAddresses, setEndAddresses] = useState([]);
     const [pickupQuery, setPickupQuery] = useState('');
     const [startPoint, setStartPoint] = useState(null);
     const [endPoint, setEndPoint] = useState(null);
@@ -215,9 +216,23 @@ const HomePage = () => {
                 });
     
                 if (!response.ok) throw new Error("Error al obtener los viajes");
-    
+
                 const data = await response.json();
                 console.log("Datos de viajes:", data);
+
+                const addressPromises = data.trips.map(trip =>
+                    getDetailAddress(trip.startPoint.lat, trip.startPoint.lng)
+                );
+                const endAddressPromises = data.trips.map(trip =>
+                    getDetailAddress(trip.endPoint.lat, trip.endPoint.lng)
+                );
+    
+                const resolvedAddresses = await Promise.all(addressPromises);
+                const resolvedEndAddresses = await Promise.all(endAddressPromises);
+                setStartAddresses(resolvedAddresses);
+                setEndAddresses(resolvedEndAddresses);
+                console.log("Direcciones resueltas:", resolvedAddresses);
+
                 setTrips(data.trips || []);
                 setFilteredTrips(data.trips || []);
             } catch (error) {
@@ -340,7 +355,21 @@ const HomePage = () => {
         }
     };
     
+    const getDetailAddress = (lat, lng) => {
+        return new Promise((resolve, reject) => {
+            const geocoder = new window.google.maps.Geocoder();
+            const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
     
+            geocoder.geocode({ location: latlng }, (results, status) => {
+                if (status === "OK" && results[0]) {
+                    resolve(results[0].formatted_address);
+                } else {
+                    console.error("Geocoding failed: ", status);
+                    resolve("Dirección no encontrada");
+                }
+            });
+        });
+    };
     
     
     
@@ -416,18 +445,17 @@ const HomePage = () => {
                         }}
                     />
                 )}
-                <Text>
-                    De: {typeof trip.startPoint === 'string' ? trip.startPoint : `Lat: ${trip.startPoint.lat}, Lng: ${trip.startPoint.lng}`}
-                </Text>
-                <Text>
-                    A: {typeof trip.endPoint === 'string' ? trip.endPoint : `Lat: ${trip.endPoint.lat}, Lng: ${trip.endPoint.lng}`}
-                </Text>
+                <Text1>
+                    De: {startAddresses[index] || 'Dirección no encontrada'}
+                </Text1>
+                <Text1>
+                    A: {endAddresses[index] || 'Dirección no encontrada'}
+                </Text1>
                 <TimeContainer>
-                    <AiOutlineClockCircle color={colors.white} />
-                    <Text>Hora de salida: {trip.departureTime || 'No especificada'}</Text>
+                    <Text1>Hora de salida: {trip.departureTime || 'No especificada'}</Text1>
                 </TimeContainer>
-                <Text>Precio/persona: ${trip.price || 'No especificado'}</Text>
-                <Text>Cupos Disponibles: {trip.capacity || 'No especificado'}</Text>
+                <Text1>Precio/persona: ${trip.price || 'No especificado'}</Text1>
+                <Text1>Cupos Disponibles: {trip.availability|| '0'}</Text1>
                 <StyledAddButton onClick={() => handleShowTripDetails(trip)}>+</StyledAddButton>
             </TripCard>
         ))

@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Title, Text } from '../../components/common/CommonStyles';
+import { Title, Text, Text1 } from '../../components/common/CommonStyles';
 import colors from '../../assets/Colors';
 import Button from '../../components/common/Button';
 import FeedbackModal from '../../components/common/FeedbackModal';
 import Loader from '../../components/common/Loader';
 import { AiOutlineDelete, AiOutlineUser, AiOutlineCloseCircle } from 'react-icons/ai';
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import 'react-tabs/style/react-tabs.css';
+import { GoogleMap, Marker, DirectionsRenderer, Autocomplete, useLoadScript } from '@react-google-maps/api';
+
+
+
+const GOOGLE_MAPS_LIBRARIES = ['places'];
+const apiKey = 'AIzaSyAhrQVoCw36PqqgNMN-AztGhfmqht47ZbI';
 
 const Container = styled.div`
     display: flex;
@@ -83,12 +91,78 @@ const DetailsModal = styled.div`
     max-width: 500px;
 `;
 
+const StyledTabs = styled(Tabs)`
+
+    .react-tabs__tab-list {
+        display: flex;
+    }
+    .react-tabs__tab {
+        font-size: 1.2em;
+        padding: 10px 20px;
+        color: white;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
+        background: transparent;
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .react-tabs__tab:hover {
+        color:${colors.primaryHover};;
+    }
+    .react-tabs__tab--selected {
+        color: #ffffff;
+        background: ${colors.primary};
+    }
+    .react-tabs__tab-panel {
+        display: flex;
+        height: 100%;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1em;
+    }
+`;
+
+const ButtonContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    gap: 20px;
+    margin-top: 20px;
+`;
+
+const ContentContainer = styled.div`
+
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: center;
+    width: 80%;
+`;
+
+const RequestContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+    border: 1px solid white;
+    border-radius: 10px;
+`;
+
 const CreatedTrips = () => {
     const [trips, setTrips] = useState([]);
     const [selectedTrip, setSelectedTrip] = useState(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [loading, setLoading] = useState(true);
+    const { isLoaded } = useLoadScript({ googleMapsApiKey: apiKey, libraries: GOOGLE_MAPS_LIBRARIES });
+    const [startAddress, setStartAddress] = useState('');
+    const [endAddress, setEndAddress] = useState('');
+    const [pendingRequest, setPendingRequest] = useState([]);
+    
 
     useEffect(() => {
         const fetchTrips = async () => {
@@ -114,14 +188,27 @@ const CreatedTrips = () => {
         fetchTrips();
     }, []);
 
-    const handleTripClick = (trip) => {
+    const handleTripClick = async(trip) => {
+        console.log(trip);
         setSelectedTrip(trip);
+        if (trip.pendingRequests)
+        {
+            setPendingRequest(trip.pendingRequests);
+        }
+        
         setShowDetailsModal(true);
+        const addressPromise = await getDetailAddress(trip.startPoint.lat, trip.startPoint.lng)
+        const endAddressPromise = await getDetailAddress(trip.endPoint.lat, trip.endPoint.lng)
+        setStartAddress(addressPromise);
+        setEndAddress(endAddressPromise);
     };
 
     const handleDeleteClick = (trip) => {
         setSelectedTrip(trip);
         setShowDeleteModal(true);
+    };
+
+    const handleStartTrip = async () => {
     };
 
     const confirmDeleteTrip = async () => {
@@ -163,6 +250,64 @@ const CreatedTrips = () => {
         setSelectedTrip(null);
     };
 
+    const getDetailAddress = async(lat, lng) => {
+        return new Promise((resolve, reject) => {
+            const geocoder = new window.google.maps.Geocoder();
+            const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
+    
+            geocoder.geocode({ location: latlng }, (results, status) => {
+                if (status === "OK" && results[0]) {
+                    resolve(results[0].formatted_address);
+                } else {
+                    console.error("Geocoding failed: ", status);
+                    resolve("Dirección no encontrada");
+                }
+            });
+        });
+    };
+
+    const handleRequestAction = async (userId, action) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!selectedTrip || !selectedTrip.tripId) {
+                console.error('El tripId no está definido');
+                return;
+            }
+    
+            const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/manage-reservation', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    tripId: selectedTrip.tripId,
+                    userId,
+                    action,
+                }),
+            });
+    
+            if (!response.ok) {
+                console.error(`Error al ${action} la solicitud:`, response.statusText);
+                return;
+            }
+    
+            // Elimina el request del array localmente
+            const requestIndex = pendingRequest.findIndex((request) => request.userId === userId);
+            if (requestIndex !== -1) {
+                const updatedRequests = [...pendingRequest];
+                updatedRequests.splice(requestIndex, 1);
+                setPendingRequest(updatedRequests); // Actualiza el estado con el array modificado
+            }
+    
+            console.log(`Solicitud ${action} correctamente para el usuario ${userId}`);
+        } catch (error) {
+            console.error(`Error al ${action} la solicitud:`, error);
+        }
+    };
+    
+    
+
     if (loading) {
         return <Loader />;
     }
@@ -186,15 +331,15 @@ const CreatedTrips = () => {
                                     <AiOutlineDelete />
                                 </DeleteIcon>
                                 <TripInfo>
-                                    <Text style={{ fontWeight: 'bold', fontSize: '16px' }}>{trip.sector}</Text>
-                                    <Text style={{ color: colors.details }}>Hora: {trip.departureTime}</Text>
-                                    <Text style={{ color: colors.details }}>
+                                    <Text1 style={{ fontWeight: 'bold', fontSize: '16px' }}>{trip.sector}</Text1>
+                                    <Text1 style={{ color: colors.details }}>Hora: {trip.departureTime}</Text1>
+                                    <Text1 style={{ color: colors.details }}>
                                         Precio /persona: <span style={{ color: colors.third }}>${trip.price}</span>
-                                    </Text>
+                                    </Text1>
                                 </TripInfo>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                                     <AiOutlineUser size={16} />
-                                    <Text>{trip.reservations ? trip.reservations.length : 0} Reservas</Text>
+                                    <Text1>{trip.reservations ? trip.reservations.length : 0} Reservas</Text1>
                                 </div>
                             </TripCard>
                         ))
@@ -208,35 +353,68 @@ const CreatedTrips = () => {
                 <>
                     <Overlay onClick={closeModals} />
                     <DetailsModal style={{ backgroundColor: colors.background }}>
-    <AiOutlineCloseCircle
-        size={24}
-        color={colors.white}
-        style={{
-            position: 'absolute',
-            top: 15,
-            right: 15,
-            cursor: 'pointer',
-        }}
-        onClick={closeModal}
-    />
-    <Title>{selectedTrip.sector}</Title>
-    <Text>
-        Desde:{' '}
-        {typeof selectedTrip.startPoint === 'object'
-            ? `Lat: ${selectedTrip.startPoint.lat}, Lng: ${selectedTrip.startPoint.lng}`
-            : selectedTrip.startPoint}
-    </Text>
-    <Text>
-        Hasta:{' '}
-        {typeof selectedTrip.endPoint === 'object'
-            ? `Lat: ${selectedTrip.endPoint.lat}, Lng: ${selectedTrip.endPoint.lng}`
-            : selectedTrip.endPoint}
-    </Text>
-    <Text>Hora de salida: {selectedTrip.departureTime}</Text>
-    <Text>Precio /persona: ${selectedTrip.price}</Text>
-    <Text>Reservas: {selectedTrip.reservations?.length || 0}</Text>
-    <Button label="Iniciar Viaje" primary onClick={handleStartTrip} />
-</DetailsModal>
+
+                        <StyledTabs>
+                            <TabList>
+                            <Tab>Viaje</Tab>
+                            <Tab>Solicitudes</Tab>
+                            <Tab>Ruta</Tab>
+                            </TabList>
+
+                            <TabPanel>
+                                
+                                <Title>{selectedTrip.sector}</Title>
+                                <ContentContainer>
+                                    <Text1>
+                                        Desde:{startAddress}
+                                    </Text1>
+                                    <Text1>
+                                        Hasta:{endAddress}
+                                    </Text1>
+                                    <Text1>Hora de salida: {selectedTrip.departureTime}</Text1>
+                                    <Text1>Precio /persona: ${selectedTrip.price}</Text1>
+                                    <Text1>Reservas: {selectedTrip.reservations?.length || 0}</Text1>
+                                </ContentContainer>                              
+                                <ButtonContainer>
+                                    <Button label="Iniciar Viaje" primary onClick={handleStartTrip} />
+                                </ButtonContainer>
+                                </TabPanel>
+                                <TabPanel>
+                                    <Title>Solicitudes</Title>
+                                    {pendingRequest.length > 0 ? (
+                                        pendingRequest.map((request) => (
+                                            <RequestContainer key={request.userId}>
+                                                <Text1>{request.location}</Text1>
+                                                <Button
+                                                    label="Aceptar"
+                                                    primary
+                                                    onClick={() => handleRequestAction(request.userId, 'accept')}
+                                                />
+                                                <Button
+                                                    label="Rechazar"
+                                                    onClick={() => handleRequestAction(request.userId, 'reject')}
+                                                />
+                                            </RequestContainer>
+                                        ))
+                                    ) : (
+                                        <Text>No hay solicitudes pendientes</Text>
+                                    )}
+                                </TabPanel>
+
+
+                        </StyledTabs>
+                        <AiOutlineCloseCircle
+                                    size={24}
+                                    color={colors.white}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 15,
+                                        right: 15,
+                                        cursor: 'pointer',
+                                    }}
+                                    onClick={() => closeModals()}
+                                />
+                    </DetailsModal>
 
                 </>
             )}

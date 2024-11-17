@@ -212,14 +212,10 @@ export const BurgerImage = styled.img`
 export const NavbarList = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 1em;
+    gap: 2em;
     align-items: center;
     justify-content: center;
     width: 100%;
-
-    @media (max-width: 1300px) {
-        gap: 0.5em;
-    }
 
     @media (max-width: 768px) {
         flex-direction: row;
@@ -232,15 +228,11 @@ export const NavbarList = styled.div`
 export const NavbarListComplete = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 1.5em;
+    gap: 2em;
     align-items: flex-start;
     justify-content: flex-start;
     width: 100%;
     margin-top: 1em;
-
-    @media (max-width: 1300px) {
-        gap: 0.5em;
-    }
 
     @media (max-width: 768px) {
         flex-direction: row;
@@ -326,7 +318,7 @@ export const NavbarItemComplete = styled.div`
     cursor: pointer;
 
     &:hover {
-        transform: scale(1.1);
+        text-decoration: underline;
     }
 
     img {

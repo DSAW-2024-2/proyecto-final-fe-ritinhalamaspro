@@ -74,7 +74,8 @@ const CenterContainer = styled.div`
 `;
 
 const Logo = styled.img`
-    width: ${({ isOpen }) => (isOpen ? '120px' : '40px')};
+    width: ${({ isOpen }) => (isOpen ? '120px' : '30px')};
+    margin-top: 1em;
     height: auto;
     transition: width 0.3s ease, opacity 0.3s ease;
     animation: ${fadeInOut} 0.3s ease;
@@ -332,13 +333,6 @@ function Header2() {
                                 active={path === '/current-trips'} 
                             />
                       </NavbarItem>
-                      <NavbarItem onClick={() => history('/pagina-principal')}>
-                      <Icon 
-                                icon={faUser} 
-                                isDriver={isDriver} 
-                                active={path === '/pagina-principal'} 
-                            />                     
-                      </NavbarItem>
                       </NavbarList>
                     </>
                     ):(
@@ -363,14 +357,6 @@ function Header2() {
                                 active={path === '/current-trips'} 
                             />                  
                         <NavbarItemText active={headerOpen}>Viajes en curso</NavbarItemText>
-                      </NavbarItemComplete>
-                      <NavbarItemComplete onClick={() => history('/pagina-principal')}>
-                      <Icon 
-                                icon={faUser} 
-                                isDriver={isDriver} 
-                                active={path === '/pagina-principal'} 
-                            />                     
-                        <NavbarItemText active={headerOpen}>Perfil</NavbarItemText>
                       </NavbarItemComplete>
                     </NavbarListComplete>
                     </>)}

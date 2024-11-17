@@ -8,6 +8,10 @@ export const Text = styled.p`
   color: ${colors.white};
 `;
 
+export const Text1 = styled.p`
+  margin: 10px;
+  color: ${colors.white};
+`;
 export const Title = styled.h2`
   text-align: center;
   margin-top: 40px;
@@ -102,8 +106,8 @@ export const LinkStyle = styled.p`
 `;
 
 export const StyledAddButton = styled.div`
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   background-color: ${(props) => (props.isHovered ? colors.third : colors.primary)};
   color: ${colors.white};
@@ -122,8 +126,9 @@ export const StyledAddButton = styled.div`
   transition: all 0.3s ease;
   &:hover{
     background-color: ${colors.third};
-    transform: scale(1.1);
   }
+  bottom: -10px;
+  right: -10px;
 `;
 
 export const Container =styled.div`
