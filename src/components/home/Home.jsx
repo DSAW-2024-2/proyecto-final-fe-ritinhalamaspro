@@ -1,7 +1,7 @@
 // src/pages/HomePage/HomePage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AiOutlineClockCircle, AiOutlineCloseCircle, AiOutlineCheckCircle   } from 'react-icons/ai';
+import { AiOutlineClockCircle, AiOutlineCloseCircle, AiOutlineCheckCircle, AiOutlineSearch   } from 'react-icons/ai';
 import styled from 'styled-components';
 import { Container, Text, Input, StyledAddButton, Text1 } from '../../components/common/CommonStyles';
 import colors from '../../assets/Colors';
@@ -36,12 +36,36 @@ const Title = styled.h2`
 
 const FilterContainer = styled.div`
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
+    flex-direction: row; /* Los hijos estarán en columnas */
+    align-items: center; /* Centrar elementos horizontalmente */
+    justify-content: flex-end;
+    margin-left: auto;
     margin-bottom: 20px;
-    width: 100%;
+    width: 50%;
 `;
+
+const FilterInputs = styled.div`
+    display: flex;
+    flex-direction: row; /* Los inputs estarán en una fila */
+    gap: 10px; /* Espacio entre inputs */
+    width: 100%; /* Asegurar que ocupen el ancho necesario */
+    justify-content: center; /* Centrar los inputs */
+`;
+
+
+const SearchIcon = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 20px; 
+    margin-left:5px;
+    color: ${colors.third}; /* Cambia este color según tu paleta */
+    &:hover {
+        color: ${colors.primaryHover}; /* Cambia el color al pasar el mouse */
+    }
+`;
+
 
 const ScrollableCardContainer = styled.div`
     display: flex;
@@ -503,7 +527,7 @@ const applyFilters = () => {
     const filtered = trips.filter((trip) => {
         return (
             (!selectedSector || trip.sector === selectedSector) &&
-            (!availableSeatsFilter || trip.availablePlaces >= parseInt(availableSeatsFilter, 10))
+            (!availableSeatsFilter || trip.capacity >= parseInt(availableSeatsFilter, 10))
         );
     });
     setFilteredTrips(filtered);
@@ -621,39 +645,39 @@ const applyFilters = () => {
             {!isDriver && (
                 <>
                     <FilterContainer>
-                    <Input
-                        as="select" // Usamos `as="select"` para mantener el estilo del componente Input
-                        placeholder="Filtrar por Sector de Inicio de Viaje"
-                        value={selectedSector}
-                        onChange={(e) => setSelectedSector(e.target.value)}
-                        
-                    >
-                        <option value="">Todos los sectores</option>
-                        {sectors.map((sector, index) => (
-                            <option key={index} value={sector}>
-                                {sector}
-                            </option>
-                        ))}
-                    </Input>
+                        <FilterInputs>
+                            <Input
+                                as="select"
+                                placeholder="Filtrar por Sector de Inicio de Viaje"
+                                value={selectedSector}
+                                onChange={(e) => setSelectedSector(e.target.value)}
+                            >
+                                <option value="">Todos los sectores</option>
+                                {sectors.map((sector, index) => (
+                                    <option key={index} value={sector}>
+                                        {sector}
+                                    </option>
+                                ))}
+                            </Input>
 
-                    <Input 
-                        placeholder="Filtrar por Cantidad de Puestos Disponibles" 
-                        value={availableSeatsFilter} 
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            if (!value || parseInt(value, 10) >= 1) {
-                                setAvailableSeatsFilter(value);
-                            } 
-                        }}
-                        type="number"
-                    />
+                            <Input 
+                                placeholder="Cantidad de Puestos Disponibles" 
+                                value={availableSeatsFilter} 
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (!value || parseInt(value, 10) >= 1) {
+                                        setAvailableSeatsFilter(value);
+                                    } 
+                                }}
+                                type="number"
+                            />
+                        </FilterInputs>
 
-                    <Button 
-                        label="Aplicar Filtros" 
-                        primary 
-                        onClick={applyFilters} 
-                    />
-                </FilterContainer>
+                        <SearchIcon onClick={applyFilters}>
+                        <AiOutlineSearch />
+                    </SearchIcon>
+                    </FilterContainer>
+
 
 
                     <ScrollableCardContainer>

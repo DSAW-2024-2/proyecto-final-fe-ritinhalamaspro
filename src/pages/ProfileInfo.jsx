@@ -121,26 +121,50 @@ const ProfileInfo = () => {
 
   const handleSaveEdit = async () => {
     const token = localStorage.getItem('token');
-
+  
+    // Crear el objeto FormData para incluir datos y archivos
+    const formData = new FormData();
+    formData.append('name', editableData.name);
+    formData.append('surName', editableData.surName);
+    formData.append('phoneNumber', editableData.phoneNumber);
+    formData.append('password', profileData.password ); // Valor actual de password
+    formData.append('photo', image || null);
+    
+    // Solo agrega la foto si hay una nueva cargada
+    if (image instanceof File) {
+      formData.append('photo', image);
+    }
+  
     try {
       const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/users/me', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
         },
-        body: JSON.stringify(editableData)
+        body: formData,
       });
-
-      if (!response.ok) throw new Error('Error al guardar los cambios en el perfil');
-      
-      fetchProfileData(token);
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error en la respuesta:', errorData);
+        throw new Error('Error al guardar los cambios en el perfil');
+      }
+  
+      fetchProfileData(token); // Actualizar los datos después de guardar
       setIsEditing(false);
       setShowQuestionModal(false);
     } catch (error) {
       console.error('Error al guardar los cambios:', error);
     }
   };
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+    }
+  };
+    
+  
 
   const handleDeleteCar = async () => {
     try {
@@ -248,6 +272,7 @@ const ProfileInfo = () => {
                 <Input name="name" value={editableData.name} onChange={handleInputChange} placeholder="Nombre" style={{ marginBottom: '10px' }} />
                 <Input name="surName" value={editableData.surName} onChange={handleInputChange} placeholder="Apellido" style={{ marginBottom: '10px' }} />
                 <Input name="phoneNumber" value={editableData.phoneNumber} onChange={handleInputChange} placeholder="Teléfono" style={{ marginBottom: '10px' }} />
+                
                 <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
                   <Button label="Cancelar" secondary onClick={handleCancelEdit} />
                   <Button label="Guardar" primary onClick={() => { setModalAction('save'); setShowQuestionModal(true); }} />
