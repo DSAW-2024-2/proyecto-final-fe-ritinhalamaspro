@@ -166,7 +166,7 @@ const CreatedTrips = () => {
     const [startPoint, setStartPoint] = useState(null);
     const [endPoint, setEndPoint] = useState(null);
     const [showMap, setShowMap] = useState(false);
-
+    const [recalculate, setRecalculate] = useState(false);
     const [map, setMap] = useState(/** @type google.maps.Map */ (null))
     const [directionsResponse, setDirectionsResponse] = useState(null)
     const [distance, setDistance] = useState('')
@@ -185,6 +185,29 @@ const CreatedTrips = () => {
         onConfirm: null,
         onClose: null,
     });
+
+    const [startMarker, setStartMarker] = useState(null);
+    const [endMarker, setEndMarker] = useState(null);
+
+    useEffect(() => {
+        setShowMap(false);
+        if (selectedTrip) {
+            console.log('Selected Trip:', selectedTrip);
+            const newStartMarker = new window.google.maps.Marker({ position: selectedTrip.startPoint });
+            const newEndMarker = new window.google.maps.Marker({ position: selectedTrip.endPoint});
+            setStartMarker(newStartMarker);
+            setEndMarker(newEndMarker);
+        }
+    }, [selectedTrip, recalculate]);
+
+    useEffect(() => {
+        // ...
+        if (selectedTrip) {
+            if (startMarker) startMarker.setMap(null); // Clear previous marker
+            if (endMarker) endMarker.setMap(null); // Clear previous marker
+            // ... create and set new markers
+        }
+    }, [selectedTrip, recalculate]);
 
     const triggerReRender = () => {
         setForceRender((prev) => prev + 1); // Cambiar el estado forzará el re-render
@@ -222,7 +245,8 @@ const CreatedTrips = () => {
         const fetchTrips = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/my-trips', {
+                const url = `${import.meta.env.VITE_API_URL}/trips/my-trips`;
+                const response = await fetch(url, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     },
@@ -303,8 +327,9 @@ const CreatedTrips = () => {
                 try {
                     const token = localStorage.getItem('token');
                     if (!token) throw new Error("Token no encontrado. Por favor, inicia sesión.");
-    
-                    const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/update-state', {
+
+                    const url = `${import.meta.env.VITE_API_URL}/trips/update-state`;
+                    const response = await fetch(url, {
                         method: 'PUT',
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -343,7 +368,8 @@ const CreatedTrips = () => {
                 return;
             }
 
-            const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/delete-trip', {
+            const url = `${import.meta.env.VITE_API_URL}/trips/delete-trip`;
+            const response = await fetch(url, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -418,16 +444,20 @@ const CreatedTrips = () => {
     useEffect(() => {
         console.log('Selected Trip:', selectedTrip);
         if (selectedTrip) {
-        window.mapRef = map;
+            window.mapRef = map;
 
-        setMap(map);
-        setLocations(selectedTrip.startPoint, setStartPoint);
-        setLocations(selectedTrip.endPoint, setEndPoint);
-        calculateRoute();
-        fitBounds(map);
+            setMap(map);
+            setLocations(selectedTrip.startPoint, setStartPoint);
+            setLocations(selectedTrip.endPoint, setEndPoint);
+            fitBounds(map);
 
+            const getRoute = async () => {
+                await calculateRoute();
+
+            }
+            getRoute();
         }
-    }, [map, selectedTrip, showMap]);
+    }, [map, selectedTrip,recalculate]);
 
     const setLocations = async (location, set) => {
         try {
@@ -447,6 +477,7 @@ const CreatedTrips = () => {
     };
 
     async function calculateRoute() {
+        console.log('Calculando ruta...');
         const directionsService = new google.maps.DirectionsService();
         const results = await directionsService.route({
             origin: startAddress,
@@ -458,7 +489,15 @@ const CreatedTrips = () => {
         setDirections(results);
         setDistance(results.routes[0].legs[0].distance.text);
         setDuration(results.routes[0].legs[0].duration.text);
+        console.log('Ruta calculada:', results);
     }
+
+    const goMap = () => {
+        setRecalculate(!recalculate);
+        setTimeout(() => {
+            setShowMap(true);
+        }, 500);
+    };
 
 
     const handleRequestAction = async (userId, action) => {
@@ -468,8 +507,8 @@ const CreatedTrips = () => {
                 console.error('El tripId no está definido');
                 return;
             }
-    
-            const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/manage-reservation', {
+            const url = `${import.meta.env.VITE_API_URL}/trips/manage-reservation`;
+            const response = await fetch(url, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -553,8 +592,7 @@ const CreatedTrips = () => {
                             }}>Viaje</Tab>
                             <Tab onClick={() => {setShowMap(false)
                             }}>Solicitudes</Tab>
-                            <Tab onClick={() => {setShowMap(true)
-                            setStartAddress(startAddress)}}>Ruta</Tab>
+                            <Tab onClick={() => {goMap()}}>Ruta</Tab>
                             </TabList>
 
                             <TabPanel>
@@ -606,18 +644,22 @@ const CreatedTrips = () => {
                                     <>
                                     <GoogleMap
                                         mapContainerStyle={{ width: '100%', height: '400px' }}
-                                        center={startPoint || { lat: 4.7325735, lng: -74.0563375 }}
                                         zoom={10}
                                         >
                                         {startPoint && <Marker position={startPoint} />}
                                         {endPoint && <Marker position={endPoint} />}
                                         {directions && <DirectionsRenderer directions={directions} />}
+                                        {selectedTrip && (
+                                            <>
+                                                {startMarker && startMarker.setMap(null)}
+                                                {endMarker && endMarker.setMap(null)}
+                                            </>
+                                        )}
                                     </GoogleMap>
                                     <Text> <span style={{ color: colors.third }}>Distancia:</span> {distance}, <span style={{ color: colors.third }}>Duración:</span> {duration}</Text>
                                     
                                     </>
-                                                                        )}
-
+                                    )}
                             </TabPanel>
                         </StyledTabs>
                     </DetailsModal>

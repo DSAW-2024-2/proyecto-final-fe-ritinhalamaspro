@@ -5,6 +5,7 @@ import Loader from '../../components/common/Loader';
 import colors from '../../assets/Colors';
 import { Container, Text, Title } from '../common/CommonStyles';
 import Button from '../common/Button';
+import { useGoogleMaps } from '../common/GoogleMapsProvider';
 
 const TripDetailsContainer = styled.div`
     display: flex;
@@ -44,15 +45,49 @@ const TripsInProgress = () => {
     const [trip, setTrip] = useState(null);
     const [loading, setLoading] = useState(true);
     const [directions, setDirections] = useState(null);
-    const { isLoaded } = useLoadScript({
-        googleMapsApiKey: import.meta.env.VITE_API_KEY,
-    });
+    const [startMarker, setStartMarker] = useState(null);
+    const [endMarker, setEndMarker] = useState(null);
+    const [showMap, setShowMap] = useState(false);
+    const [recalculate, setRecalculate] = useState(false);
+    const { services, isLoaded, loadError } = useGoogleMaps();
+
+
+    useEffect(() => {
+        setRecalculate(!recalculate);
+        if(trip) {
+            calculateRoute(trip.startPoint, trip.endPoint, trip.acceptedRequests);
+        }
+        setTimeout(() => {
+            setShowMap(true);
+        }, 500);
+    }, [trip]);
+
+    useEffect(() => {
+        setShowMap(false);
+        if (trip) {
+            console.log('Selected Trip:', trip);
+            const newStartMarker = new window.google.maps.Marker({ position: trip.startPoint });
+            const newEndMarker = new window.google.maps.Marker({ position: trip.endPoint});
+            setStartMarker(newStartMarker);
+            setEndMarker(newEndMarker);
+        }
+    }, [trip,recalculate]);
+
+    useEffect(() => {
+        // ...
+        if (trip) {
+            if (startMarker) startMarker.setMap(null); // Clear previous marker
+            if (endMarker) endMarker.setMap(null); // Clear previous marker
+            // ... create and set new markers
+        }
+    }, [trip, recalculate]);
 
     useEffect(() => {
         const fetchTrips = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/my-trips', {
+                const url = `${import.meta.env.VITE_API_URL}/trips/my-trips`;
+                const response = await fetch(url, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -122,19 +157,22 @@ const TripsInProgress = () => {
                 </Title>
             <TripDetailsContainer>
     <MapContainer>
-        {isLoaded && directions && trip.startPoint && trip.endPoint ? (
+        {showMap && (
             <GoogleMap
                 mapContainerStyle={{ width: '100%', height: '100%' }}
                 zoom={10}
-                center={trip.startPoint}
-            >
-                <Marker position={trip.startPoint} />
-                <Marker position={trip.endPoint} />
-                <DirectionsRenderer directions={directions} />
+                >
+                {trip.startPoint && <Marker position={trip.startPoint} />}
+                {trip.endPoint && <Marker position={trip.endPoint} />}
+                {directions && <DirectionsRenderer directions={directions} />}
+                {trip && (
+                    <>
+                        {startMarker && startMarker.setMap(null)}
+                        {endMarker && endMarker.setMap(null)}
+                    </>
+                )}
             </GoogleMap>
-        ) : (
-            <Loader />
-        )}
+            )}
     </MapContainer>
 
     <TripDetails>

@@ -9,7 +9,7 @@ export const Text = styled.p`
 `;
 
 export const Text1 = styled.p`
-  margin: 10px;
+  margin: 6px;
   color: ${colors.white};
 `;
 

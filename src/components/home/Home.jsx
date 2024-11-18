@@ -258,64 +258,6 @@ const HomePage = () => {
         }
     }, [selectedTrip]);
 
-    
-    useEffect(() => {
-
-        const fetchTrips = async (universityID) => {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/all', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-        
-                if (!response.ok) throw new Error("Error al obtener los viajes");
-                console.log(data.trips);
-
-                const data = await response.json();
-                console.log("Datos de viajes:", data);
-        
-                // Filtrar viajes no creados por el usuario logueado y con status: 0
-                const filteredTrips = data.trips
-                    .filter(trip => trip.userId !== universityID )
-                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Ordenar por fecha de creación
-        
-                // Extraer direcciones de inicio y fin para mostrar
-                const addressPromises = filteredTrips.map(trip =>
-                    getDetailAddress(trip.startPoint.lat, trip.startPoint.lng)
-                );
-                const endAddressPromises = filteredTrips.map(trip =>
-                    getDetailAddress(trip.endPoint.lat, trip.endPoint.lng)
-                );
-        
-                const resolvedAddresses = await Promise.all(addressPromises);
-                const resolvedEndAddresses = await Promise.all(endAddressPromises);
-        
-                setStartAddresses(resolvedAddresses);
-                setEndAddresses(resolvedEndAddresses);
-                setTrips(filteredTrips);
-                setFilteredTrips(filteredTrips);
-        
-            } catch (error) {
-                console.error("Error al obtener los viajes:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        
-        setTimeout(() => {
-            setUserName(id)
-            setUserUniversityId(universityId)
-            console.log("Nombre de usuario:", universityId);
-
-            
-        }, 1000);
-
-        if(universityId !== null)
-            console.log("Universidad del usuario:", universityId);
-            fetchTrips(universityId);
-    }, [id, universityId]);
 
     useEffect(() => {
         if (selectedTrip) {
@@ -333,8 +275,8 @@ const HomePage = () => {
                 console.error('El userId no está definido');
                 return;
             }
-    
-            const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/manage-reservation', {
+            const url = `${import.meta.env.VITE_API_URL}/trips/manage-reservation`;
+            const response = await fetch(url, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -382,7 +324,8 @@ const HomePage = () => {
         const fetchTripsDriver = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/my-trips', {
+                const url = `${import.meta.env.VITE_API_URL}/trips/my-trips`;
+                const response = await fetch(url, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -473,7 +416,8 @@ useEffect(() => {
     const fetchTrips = async (universityID) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/all', {
+            const url = `${import.meta.env.VITE_API_URL}/trips/alls`;
+            const response = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -483,15 +427,18 @@ useEffect(() => {
 
             const data = await response.json();
             console.log("Datos de viajes:", data);
+            const newFilteredTrips = data.trips
+                    .filter(trip => trip.userId !== universityID && trip.state === 0)
+                    .reverse();
 
             // Extrae todos los sectores únicos
-            const uniqueSectors = [...new Set(data.trips.map(trip => trip.sector))];
+            const uniqueSectors = [...new Set(newFilteredTrips.map(trip => trip.sector))];
             setSectors(uniqueSectors);
 
-            const addressPromises = data.trips.map(trip =>
+            const addressPromises = newFilteredTrips.map(trip =>
                 getDetailAddress(trip.startPoint.lat, trip.startPoint.lng)
             );
-            const endAddressPromises = data.trips.map(trip =>
+            const endAddressPromises = newFilteredTrips.map(trip =>
                 getDetailAddress(trip.endPoint.lat, trip.endPoint.lng)
             );
 
@@ -500,7 +447,7 @@ useEffect(() => {
             setStartAddresses(resolvedAddresses);
             setEndAddresses(resolvedEndAddresses);
 
-            const filteredTrips = data.trips.filter(trip => trip.userId !== universityID);
+            const filteredTrips = newFilteredTrips.filter(trip => trip.userId !== universityID);
             setTrips(filteredTrips);
             setFilteredTrips(filteredTrips);
 
@@ -558,8 +505,9 @@ const applyFilters = () => {
         try {
             const token = localStorage.getItem('token');
             if (!token) throw new Error("Token no encontrado. Por favor, inicia sesión.");
-    
-            const response = await fetch(`https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/reserve`, {
+
+            const url = `${import.meta.env.VITE_API_URL}/trips/reserve`;
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

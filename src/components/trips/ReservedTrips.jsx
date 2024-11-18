@@ -163,7 +163,8 @@ const ReservedTrips = () => {
         const fetchReservedTrips = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/my-reservations', {
+                const url = `${import.meta.env.VITE_API_URL}/trips/my-reservations`;
+                const response = await fetch(url, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }

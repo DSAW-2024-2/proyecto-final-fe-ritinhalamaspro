@@ -194,8 +194,8 @@ const CreateTrip = () => {
                 
                 console.log("JSON enviado:", JSON.stringify(tripData));
                 console.log("Token enviado:", token);
-    
-                const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/create/', {
+                const url = `${import.meta.env.VITE_API_URL}/trips/create/`;
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,

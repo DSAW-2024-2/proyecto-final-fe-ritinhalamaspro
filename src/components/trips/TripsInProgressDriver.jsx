@@ -6,6 +6,7 @@ import colors from '../../assets/Colors';
 import { Container, Text, Title } from '../common/CommonStyles';
 import Button from '../common/Button';
 import FeedbackModal from '../common/FeedbackModal';
+import { useGoogleMaps } from '../common/GoogleMapsProvider';
 
 
 const TripDetailsContainer = styled.div`
@@ -31,6 +32,11 @@ const StopsList = styled.ul`
     padding: 0;
 `;
 
+const ButtonContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    width: 100%;
+`;
 const StopItem = styled.li`
     margin-bottom: 10px;
 `;
@@ -46,9 +52,6 @@ const TripsInProgress = () => {
     const [trip, setTrip] = useState(null);
     const [loading, setLoading] = useState(true);
     const [directions, setDirections] = useState(null);
-    const { isLoaded } = useLoadScript({
-        googleMapsApiKey: import.meta.env.VITE_API_KEY,
-    });
 
     const [feedbackModal, setFeedbackModal] = useState({
         isOpen: false,
@@ -59,12 +62,49 @@ const TripsInProgress = () => {
         onClose: null,
     });
     
+    const [startMarker, setStartMarker] = useState(null);
+    const [endMarker, setEndMarker] = useState(null);
+    const [showMap, setShowMap] = useState(false);
+    const [recalculate, setRecalculate] = useState(false);
+    const { services, isLoaded, loadError } = useGoogleMaps();
+
+
+    useEffect(() => {
+        setRecalculate(!recalculate);
+        if(trip) {
+            calculateRoute(trip.startPoint, trip.endPoint, trip.acceptedRequests);
+        }
+        setTimeout(() => {
+            setShowMap(true);
+        }, 500);
+    }, [trip]);
+
+    useEffect(() => {
+        setShowMap(false);
+        if (trip) {
+            console.log('Selected Trip:', trip);
+            const newStartMarker = new window.google.maps.Marker({ position: trip.startPoint });
+            const newEndMarker = new window.google.maps.Marker({ position: trip.endPoint});
+            setStartMarker(newStartMarker);
+            setEndMarker(newEndMarker);
+        }
+    }, [trip,recalculate]);
+
+    useEffect(() => {
+        // ...
+        if (trip) {
+            if (startMarker) startMarker.setMap(null); // Clear previous marker
+            if (endMarker) endMarker.setMap(null); // Clear previous marker
+            // ... create and set new markers
+        }
+    }, [trip, recalculate]);
 
     useEffect(() => {
         const fetchTrips = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/my-trips', {
+                const url = `${import.meta.env.VITE_API_URL}/trips/my-trips`;
+                const response = await fetch(url, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -87,6 +127,74 @@ const TripsInProgress = () => {
 
         fetchTrips();
     }, []);
+
+    const getCoordinatesFromAddress = (address) => {
+        return new Promise((resolve, reject) => {
+            if (!window.google || !window.google.maps) {
+                reject("Google Maps JavaScript API no está cargada");
+                return;
+            }
+    
+            const geocoder = services.geocoder;
+    
+            geocoder.geocode({ address }, (results, status) => {
+                if (status === "OK" && results[0]) {
+                    const location = results[0].geometry.location;
+                    resolve({
+                        lat: location.lat(),
+                        lng: location.lng(),
+                    });
+                } else {
+                    reject(`No se pudo geocodificar la dirección. Status: ${status}`);
+                }
+            });
+        });
+    };
+
+    const navigateToMaps = () => {
+        const origin = `${trip.startPoint.lat},${trip.startPoint.lng}`;
+        const destination = `${trip.endPoint.lat},${trip.endPoint.lng}`;
+
+        if (trip.acceptedRequests) {
+
+            const processRequests = async () => {
+                try {
+                    // Iterar sobre cada solicitud y convertir direcciones a coordenadas
+                    const waypoints = await Promise.all(
+                        trip.acceptedRequests.map(async (request) => {
+                            const coordinates = await getCoordinatesFromAddress(request.location);
+                            console.log(coordinates);
+                            return { location: coordinates, stopover: true }; // Crear un waypoint
+                        })
+                    );
+
+                    console.log('Waypoints:', waypoints);
+     
+                    // Establecer los waypoints convertidos
+                    const waypointsUrl = waypoints?.map(waypoint => `${waypoint.location.lat},${waypoint.location.lng}`).join('/');
+        
+                    // Construir la URL con waypoints (si existen)
+                    let url = `https://www.google.com/maps/dir/${origin}`;
+                    
+                    if (waypointsUrl) {
+                       url += `/${waypointsUrl}`;
+                    }
+                
+                    url += `/${destination}`;
+
+                    window.open(url, '_blank');
+            
+                } catch (error) {
+                    console.error("Error al procesar solicitudes aceptadas:", error);
+                }
+            };
+
+            processRequests();
+        }
+        
+        // Construir la cadena de waypoints si existen
+
+    };
 
     const calculateRoute = async (start, end, acceptedRequests = []) => {
         try {
@@ -119,7 +227,8 @@ const TripsInProgress = () => {
             onConfirm: async () => {
                 try {
                     const token = localStorage.getItem('token');
-                    const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/trips/update-state', {
+                    const url = `${import.meta.env.VITE_API_URL}/trips/update-state`;
+                    const response = await fetch(url, {
                         method: 'PUT',
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -169,20 +278,25 @@ const TripsInProgress = () => {
             <TripDetailsContainer>
             <div style={{ textAlign: 'center', marginTop: '10px' }}>      
             <MapContainer>
-            {isLoaded && directions ? (
+            {showMap && (
                 <GoogleMap
                     mapContainerStyle={{ width: '100%', height: '100%' }}
                     zoom={10}
-                    center={trip.startPoint}
-                >
-                    <DirectionsRenderer directions={directions} />
+                    >
+                    {trip.startPoint && <Marker position={trip.startPoint} />}
+                    {trip.endPoint && <Marker position={trip.endPoint} />}
+                    {directions && <DirectionsRenderer directions={directions} />}
+                    {trip && (
+                        <>
+                            {startMarker && startMarker.setMap(null)}
+                            {endMarker && endMarker.setMap(null)}
+                        </>
+                    )}
                 </GoogleMap>
-            ) : (
-                <Loader />
-            )}
+                )}
         </MapContainer>
         
-            <Button label="Finalizar Viaje" primary onClick={handleFinalizeTrip} />
+            <Button label="Abrir en maps" primary onClick={() => navigateToMaps()} />
         </div>
 
 
@@ -212,6 +326,9 @@ const TripsInProgress = () => {
                     ) : (
                         <Text>No hay reservas en este viaje.</Text>
                     )}
+                    <ButtonContainer>
+                    <Button label="Finalizar Viaje" primary onClick={handleFinalizeTrip} />
+                    </ButtonContainer>
                 </TripDetails>
             </TripDetailsContainer>
             {feedbackModal.isOpen && (
