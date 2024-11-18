@@ -78,7 +78,9 @@ const RegisterCarNoHeader = () => {
       const token = localStorage.getItem('token'); 
 
       // Hacer la solicitud POST al servidor con el token en los headers
-      const response = await axios.post('https://proyecto-final-be-ritinhalamaspro.vercel.app/register_car', formData, {
+      const url = `${import.meta.env.VITE_API_URL}/register_car`;
+
+      const response = await axios.post(url, formData, {
         headers: {
           // No establecer 'Content-Type' manualmente
           'Authorization': `Bearer ${token}`, // Incluir el token en los headers

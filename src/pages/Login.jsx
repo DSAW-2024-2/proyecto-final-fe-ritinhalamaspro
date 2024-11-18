@@ -69,7 +69,8 @@ const Login = () => {
     console.log('Datos enviados al servidor:', JSON.stringify(loginData, null, 2));
 
     try {
-      const response = await axios.post('https://proyecto-final-be-ritinhalamaspro.vercel.app/login', loginData);
+      const url = `${import.meta.env.VITE_API_URL}/login`;
+      const response = await axios.post(url, loginData);
 
       console.log('Respuesta del servidor:', response.data);
 

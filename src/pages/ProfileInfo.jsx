@@ -45,9 +45,12 @@ const ProfileInfo = () => {
   const fetchProfileData = async (token) => {
     try {
       setLoading(true);
+
+      const urlUsersMe = `${import.meta.env.VITE_API_URL}/users/me`;
+      const urlCarsMe = `${import.meta.env.VITE_API_URL}/cars/me`;
       const endpoint = isPassenger
-        ? 'https://proyecto-final-be-ritinhalamaspro.vercel.app/users/me'
-        : 'https://proyecto-final-be-ritinhalamaspro.vercel.app/cars/me';
+        ? urlUsersMe
+        : urlCarsMe;
       
       const response = await fetch(endpoint, {
         method: 'GET',
@@ -83,7 +86,8 @@ const ProfileInfo = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/logout', {
+      const url = `${import.meta.env.VITE_API_URL}/logout`;
+      await fetch(url, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -136,7 +140,8 @@ const ProfileInfo = () => {
     }
   
     try {
-      const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/users/me', {
+      const url = `${import.meta.env.VITE_API_URL}/users/me`;
+      const response = await fetch(url, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -169,7 +174,8 @@ const ProfileInfo = () => {
   const handleDeleteCar = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://proyecto-final-be-ritinhalamaspro.vercel.app/cars/me', {
+      const url = `${import.meta.env.VITE_API_URL}/cars/me`;
+      const response = await fetch(url, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

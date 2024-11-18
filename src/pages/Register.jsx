@@ -198,8 +198,8 @@ const Register = () => {
       if (selectedImage) {
         formData.append('photo', selectedImage);
       }
-
-      const response = await axios.post('https://proyecto-final-be-ritinhalamaspro.vercel.app/register', formData, {
+      const url = `${import.meta.env.VITE_API_URL}/register`;
+      const response = await axios.post(url, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
