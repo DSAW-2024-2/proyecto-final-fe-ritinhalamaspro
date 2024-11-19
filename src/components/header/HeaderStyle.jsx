@@ -1,9 +1,9 @@
 import styled from "styled-components";
 import {Link} from 'react-router-dom'
 import colors from '../../assets/Colors';
-
+ 
 const Nav = styled.div `
-  padding: 0 6vh 0 2vw; 
+  padding: 0 6vh 0 2vw;
   display: flex;
   min-height: 12vh;
   justify-content: space-between;
@@ -16,23 +16,23 @@ const Nav = styled.div `
   left: 0;
   right: 0;
 `
-
+ 
 const Left = styled.div`
     display: flex;
     padding: 1em;
     align-items: center;
     width: 30%;
 `
-
+ 
 const Logo = styled.img `
-
+ 
     cursor: pointer;
     width: 50%;
     @media (max-width: 800px) {
         width: 100%;
     }
 `
-
+ 
 const NavMenu = styled.div`
     display: flex;
     justify-content: space-between;
@@ -46,7 +46,7 @@ const NavMenu = styled.div`
         width: 100%;
     }
 `
-
+ 
 const Hamburger = styled.div`
   display: none;
   flex-direction: column;
@@ -62,7 +62,7 @@ const Hamburger = styled.div`
     display: flex;
   }
 `
-
+ 
 const MenuLink = styled(Link) `
     padding: 1rem 2rem;
     cursor: pointer;
@@ -73,7 +73,7 @@ const MenuLink = styled(Link) `
     color: white;
     font-weight: bold;
     span{
-        position: relative; 
+        position: relative;
         &:after{
             content:"";
             height: 2px;
@@ -95,17 +95,25 @@ const MenuLink = styled(Link) `
         }
   }
 `
-
+ 
 export const NavbarContainer = styled.div`
     background-color: ${colors.background};
     width: 6em;
+ 
+    @media (max-width: 768px) {
+        width: 100vw;
+        position: fixed;
+        bottom: 0;
+        z-index: 999;
+    }
 `
-
+ 
 export const NavbarMenu = styled.nav`
     background-color: ${colors.background};
     color: white;
     transition: all 0.5s ease;
     border-right: solid 1px #ffffff;
+    box-shadow: 0 0 20px rgba(91, 91, 91, 0.3);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -122,23 +130,20 @@ export const NavbarMenu = styled.nav`
         justify-content: center;
         align-items: center;
         position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 10;
+        z-index: 999;
     }
 `;
-
+ 
 export const Burger = styled.div`
     margin-top: 1em;
     display: flex;
     justify-content: center;
-
+ 
     @media (max-width: 768px) {
         display: none;
     }
 `;
-
+ 
 export const User = styled.div`
     display: flex;
     flex-direction: row;
@@ -147,9 +152,13 @@ export const User = styled.div`
     width: ${({ open }) => (open ? "100%" : "100%")};
     transition: all 0.5s ease;
     justify-content: center;
-    align-items: center; 
+    align-items: center;
+ 
+    @media (max-width: 768px) {
+        display: none;
+    }
 `;
-
+ 
 export const UserInfo = styled.div`
     display: flex;
     flex-direction: column;
@@ -157,21 +166,21 @@ export const UserInfo = styled.div`
     align-items: flex-start;
     transition: all 0.5s ease;
 `;
-
+ 
 export const UserName = styled.div`
     font-size: 1.2em;
     font-weight: 500;
     color: white;
     transition: all 0.5s ease;
 `;
-
+ 
 export const UserRole = styled.div`
     font-size: 1em;
     font-weight: 300;
     color: white;
     transition: all 0.5s ease;
 `;
-
+ 
 export const UserPhoto = styled.div`
     
     display: flex;
@@ -181,14 +190,15 @@ export const UserPhoto = styled.div`
     align-items: center;
     gap: 1em;
     transition: all 0.5s ease;
-
+ 
     img {
-    width: 3.5em;
-    height: 3.5em;
+    width: 3.2em;
+    height: 3.2em;
     border-radius: 50%;
     object-fit: cover;
     object-position: center;
     transition: all 0.5s ease;
+    border: 2px solid ${colors.details};
     }
 `;
 export const RowContainer = styled.div`
@@ -203,12 +213,12 @@ export const BurgerImage = styled.img`
     width: ${({ isOpen }) => (isOpen ? "95%" : "4em")};
     height: 5em;
     cursor: pointer;
-
+ 
     @media (max-width: 1300px) {
         width: ${({ isOpen }) => (isOpen ? "90%" : "4em")};
     }
 `;
-
+ 
 export const NavbarList = styled.div`
     display: flex;
     flex-direction: column;
@@ -216,7 +226,7 @@ export const NavbarList = styled.div`
     align-items: center;
     justify-content: center;
     width: 100%;
-
+ 
     @media (max-width: 768px) {
         flex-direction: row;
         gap: 1em;
@@ -224,7 +234,7 @@ export const NavbarList = styled.div`
         justify-content: space-around;
     }
 `;
-
+ 
 export const NavbarListComplete = styled.div`
     display: flex;
     flex-direction: column;
@@ -233,7 +243,7 @@ export const NavbarListComplete = styled.div`
     justify-content: flex-start;
     width: 100%;
     margin-top: 1em;
-
+ 
     @media (max-width: 768px) {
         flex-direction: row;
         gap: 1em;
@@ -241,7 +251,7 @@ export const NavbarListComplete = styled.div`
         justify-content: space-around;
     }
 `;
-
+ 
 export const NavbarListTitle = styled.div`
     display: flex;
     width: 100%;
@@ -262,16 +272,16 @@ export const NavbarOptions = styled.div`
     justify-content: center;
     width: 100%;
     margin-top: ${({ isOpen }) => (isOpen ? "2em" : "4em")};
-
+ 
     @media (max-width: 1300px) {
         margin-top: ${({ isOpen }) => (isOpen ? "3em" : "5em")};
     }
-
+ 
     @media (max-width: 768px) {
         margin-top: 1em
     }
 `
-
+ 
 export const NavbarItem = styled.div`
     display: flex;
     flex-direction: column;
@@ -281,15 +291,39 @@ export const NavbarItem = styled.div`
     height: 3em;
     cursor: pointer;
     transition: 0.2s;
-
+ 
     &:hover {
         transform: scale(1.1);
     }
-
+ 
     img {
         width: 80%;
     }
   `
+ 
+export const NavbarItem1 = styled.div`
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 3em;
+    height: 3em;
+    cursor: pointer;
+    transition: 0.2s;
+    display: none;
+ 
+    &:hover {
+        transform: scale(1.1);
+    }
+ 
+    img {
+        width: 80%;
+    }
+ 
+    @media (max-width: 768px) {
+        display: flex;
+    }
+ 
+`
 export const LogOutItem = styled(NavbarItem)`
     flex-direction: row;
     color: white;
@@ -301,13 +335,13 @@ export const LogOutItem = styled(NavbarItem)`
     background-color: black;
     width: 100%;
     border-radius: 0px 0px 20px 20px;
-
+ 
     &:hover{
         transform: scale(1);
         color: #ff3b3b;
     }
 `
-
+ 
 export const NavbarItemComplete = styled.div`
     display: flex;
     flex-direction: row;
@@ -316,17 +350,17 @@ export const NavbarItemComplete = styled.div`
     width: 100%;
     height: 2em;
     cursor: pointer;
-
+ 
     &:hover {
         text-decoration: underline;
     }
-
+ 
     img {
         width: 30%;
         height: 100%;
     }
   `
-
+ 
 export const NavbarItemText = styled.div`
     font-size: 1.2em;
     font-weight: 500;
@@ -335,13 +369,13 @@ export const NavbarItemText = styled.div`
     transition: opacity 0.5s ease-in-out;
     margin-left: 1em;
 `;
-
+ 
 export const Separator = styled.div`
     width: 80%;
     height: 3px;
     background-color: black;
 `;
-
+ 
 export const UserNav = styled.div`
     display: flex;
     flex-direction: column;
@@ -350,47 +384,47 @@ export const UserNav = styled.div`
     width: 100%;
     height: 100%;
     margin-bottom: 1em;
-
+ 
     @media (max-width: 768px) {
         display: none;
     }
-
+ 
 `;
-
+ 
 export const UserMobile = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
     height: 100%;
-
+ 
     @media (max-width: 768px) {
         display: none;
     }
-
+ 
 `;
-
+ 
 export const NavbarListImg = styled.img`
     width: 55%;
     height: 55%;
     cursor: pointer;
-
+ 
     @media (max-width: 768px) {
         width: 50%;
         height: 50%;
     }
 `;
-
+ 
 export const NavbarListItem = styled.div`
    font-size: 1em;
    font-weight: 500;
    text-align: center;
-
+ 
     @media (max-width: 768px) {
         display: none;
     }
 `;
-
+ 
 export const NavbarListItemBox = styled.div`
     display: flex;
     flex-direction: column;
@@ -400,27 +434,27 @@ export const NavbarListItemBox = styled.div`
     background-color: ${colors.primary};
     align-items: center;
     justify-content: center;
-
-
+ 
+ 
     &:first-child {
         margin-top: 3em;
     }
-
+ 
     &:hover {
         background-color: ${colors.primary};
         cursor: pointer;
     }
-
+ 
     @media (max-width: 768px) {
         height: 3em;
         width: 3em;
-
+ 
         &:first-child {
             margin-top: 0;
         }
     }
 `;
-
+ 
 export const NavbarListItemBoxUser = styled.div`
     display: flex;
     flex-direction: column;
@@ -430,15 +464,15 @@ export const NavbarListItemBoxUser = styled.div`
     background-color: ${colors.primary};
     align-items: center;
     justify-content: center;
-
+ 
     &:hover {
         background-color: ${colors.primary};
         cursor: pointer;
     }
-
+ 
     @media (max-width: 768px) {
         display: flex;
     }
 `;
-
+ 
 export { Nav, Left, Logo, NavMenu, Hamburger, MenuLink }

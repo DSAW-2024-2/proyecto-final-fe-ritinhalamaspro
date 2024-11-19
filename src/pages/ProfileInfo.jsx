@@ -10,6 +10,8 @@ import Colors from '../assets/Colors';
 import {useDispatch, useSelector} from "react-redux"
 import { clearUser } from '../features/users/UserSlice';
 
+import userPhoto from '../assets/PofilePhoto.png';
+
 const ProfileInfo = () => {
   const navigate = useNavigate();
   
@@ -234,7 +236,7 @@ const ProfileInfo = () => {
         marginTop: '20px',
       }}>
         <div style={{ position: 'absolute', top: '-150px', left: '50%', transform: 'translateX(-50%)' }}>
-          <ProfilePhoto imageUrl={image ? image : 'src/assets/profilephoto.png'} size="120px" />
+          <ProfilePhoto imageUrl={image ? image : userPhoto} size="120px" />
         </div>
 
         {isPassenger && !isEditing && (

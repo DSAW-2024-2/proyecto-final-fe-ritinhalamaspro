@@ -2,7 +2,7 @@ import React, { useState, useEffect} from 'react'
 import styled,{keyframes} from 'styled-components'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {useDispatch, useSelector} from "react-redux"
-import { Burger, BurgerImage, Hamburger, Left, LogOutItem, MenuLink, Nav, NavMenu, NavbarContainer, NavbarItem, NavbarItemComplete, NavbarItemText, NavbarList, NavbarListComplete, NavbarListImg, NavbarListItem, NavbarListItemBox, NavbarListItemBoxUser, NavbarListTitle, NavbarMenu, NavbarOptions, RowContainer, Separator, User, UserInfo, UserName, UserPhoto, UserRole } from './HeaderStyle'
+import { Burger, BurgerImage, Hamburger, Left, LogOutItem, MenuLink, Nav, NavMenu, NavbarContainer, NavbarItem, NavbarItem1, NavbarItemComplete, NavbarItemText, NavbarList, NavbarListComplete, NavbarListImg, NavbarListItem, NavbarListItemBox, NavbarListItemBoxUser, NavbarListTitle, NavbarMenu, NavbarOptions, RowContainer, Separator, User, UserInfo, UserName, UserPhoto, UserRole } from './HeaderStyle'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import colors from '../../assets/Colors';
 import { useDriver } from '../../context/DriverContext';
@@ -10,15 +10,16 @@ import { faChevronLeft, faChevronRight, faHome, faMap, faUser, faRoad } from '@f
 import logo from '../../assets/Logo.png';
 import logoS from '../../assets/LogoS.png';
 import { AiOutlineUser, AiOutlineCar } from 'react-icons/ai';
-import { StyledWrapper } from '../common/CommonStyles';
+import { StyledWrapper, StyledWrapper1 } from '../common/CommonStyles';
 import FeedbackModal from '../common/FeedbackModal';
 import { setUserLogin } from '../../features/users/UserSlice'
-
+import userPhoto from '../../assets/PofilePhoto.png'
+ 
 const fadeInOut = keyframes`
     from { opacity: 0; }
     to { opacity: 1; }
 `;
-
+ 
 const HeaderWrapper = styled.header`
     display: flex;
     flex-direction: column;
@@ -29,7 +30,7 @@ const HeaderWrapper = styled.header`
     position: relative;
     width: ${({ isOpen }) => (isOpen ? '250px' : '60px')};
     transition: width 0.3s ease;
-    box-shadow: ${({ isOpen }) => (isOpen ? '5px 0 15px rgba(0, 0, 0, 0.3)' : 'none')}; 
+    box-shadow: ${({ isOpen }) => (isOpen ? '5px 0 15px rgba(0, 0, 0, 0.3)' : 'none')};
     
     @media (max-width: 768px) {
         width: 100%;
@@ -43,7 +44,7 @@ const HeaderWrapper = styled.header`
         align-items: center;
     }
 `;
-
+ 
 const ToggleButton = styled.button`
     position: absolute;
     top: 10px;
@@ -53,12 +54,12 @@ const ToggleButton = styled.button`
     color: ${colors.white};
     font-size: 24px;
     cursor: pointer;
-
+ 
     @media (max-width: 768px) {
         display: none;
     }
 `;
-
+ 
 const CenterContainer = styled.div`
     display: flex;
     flex-direction: column;
@@ -67,58 +68,58 @@ const CenterContainer = styled.div`
     width: 100%;
     margin-top: 30px;
     margin-bottom: 30px;
-
+ 
     @media (max-width: 768px) {
         display: none;
     }
 `;
-
+ 
 const Logo = styled.img`
     width: ${({ isOpen }) => (isOpen ? '120px' : '25px')};
     margin-top: 1em;
     height: auto;
     transition: width 0.3s ease, opacity 0.3s ease;
     animation: ${fadeInOut} 0.3s ease;
-
+ 
     @media (max-width: 768px) {
         display: none;
     }
 `;
-
+ 
 const Icon = styled(FontAwesomeIcon)`
-    color: ${({ isDriver, active }) => 
+    color: ${({ isDriver, active }) =>
         isDriver && active ? colors.primary : !isDriver && active ? colors.third : colors.details};
     font-size: 24px;
     background: none;
-
+ 
     &:hover {
         color: ${colors.primaryHover};
     }
 `;
-
+ 
 const MenuText = styled.span`
     color: ${colors.white};
     display: ${({ isOpen }) => (isOpen ? 'inline' : 'none')};
     background: none;
-
+ 
     &:hover {
         color: ${colors.primaryHover};
     }
-
+ 
     @media (max-width: 768px) {
         display: none;
     }
 `;
-
+ 
 function Header2() {
-
+ 
     const [isOpen, setIsOpen] = useState(false)
     const history = useNavigate()
     const dispatch = useDispatch()
     const path = useLocation().pathname
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [userName, setUserName] = useState('')
-
+ 
     const navigate = useNavigate();
     const location = useLocation();
     const [isLogged, setIsLogged] = useState(false);
@@ -128,12 +129,12 @@ function Header2() {
     const { isDriver, toggleDriverMode } = useDriver();
     const [hasCarRegistered, setHasCarRegistered] = useState(false);
     const [photoUrl, setPhotoUrl] = useState('');
-
+ 
     const verifyCarRegistration = async () => {
       const token = localStorage.getItem('token');
       try {
           const url = `${import.meta.env.VITE_API_URL}/cars/me`;
-
+ 
           const response = await fetch(url, {
               method: 'GET',
               headers: {
@@ -141,7 +142,7 @@ function Header2() {
                   'Content-Type': 'application/json',
               },
           });
-
+ 
           const data = await response.json();
           if (data && Object.keys(data).length > 0) {
               setHasCarRegistered(true);
@@ -151,13 +152,13 @@ function Header2() {
               setHasCarRegistered(false);
               return false;
           }
-
+ 
       } catch (error) {
           console.error('Error al verificar el registro del carro:', error);
           return false;
       }
   };
-
+ 
   const verifyIsDriver = async () => {
       const token = localStorage.getItem('token');
       try {
@@ -169,7 +170,7 @@ function Header2() {
                   'Content-Type': 'application/json',
               },
           });
-
+ 
           if (!response.ok) {
               setShowRegisterCarModal(true);
               return true;
@@ -178,13 +179,13 @@ function Header2() {
               setShowRegisterCarModal(false);
               return false;
           }
-
+ 
       } catch (error) {
           console.error('Error al verificar el registro del carro:', error);
           return false;
       }
   };
-
+ 
   const fetchProfileData = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -197,7 +198,7 @@ function Header2() {
             'Content-Type': 'application/json'
           },
         });
-
+ 
         if (!response.ok) throw new Error('Error al obtener los datos del perfil');
         
         let data = await response.json();
@@ -207,9 +208,14 @@ function Header2() {
             token: token,
             photo: data.photoURL,            
         }));
-        setPhotoUrl(data.photoURL);
+        console.log(data.photoURL)
+        if (data.photoURL === undefined) {
+            setPhotoUrl(userPhoto);
+        }else{
+            setPhotoUrl(data.photoURL);
+        }
         setUserName(data.name);
-
+ 
       } catch (error) {
         console.error('Error:', error);
       }
@@ -226,11 +232,11 @@ function Header2() {
           toggleDriverMode();
       }
   };
-
+ 
   const confirmToggleDriverMode = async() => {
       setShowToggleModeModal(true);
   };
-
+ 
   useEffect(() => {
       const token = localStorage.getItem('token');
       setIsLogged(!!token);
@@ -238,18 +244,18 @@ function Header2() {
           navigate('/');
       }
   }, []);
-
+ 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if(token){
       fetchProfileData();
     }
   }, [path]);
-
+ 
   useEffect(() => {
       verifyCarRegistration();
   }, []);
-
+ 
   useEffect(() => {
       if (isDriver) {
           if (path === '/reserved-trips') navigate('/created-trips');
@@ -262,7 +268,7 @@ function Header2() {
           }
       }
   }, [isDriver, path]);
-
+ 
   useEffect(() => {
       const token = localStorage.getItem('token');
       console.log('Path:', path);
@@ -277,19 +283,19 @@ function Header2() {
       }
       console.log('Header Open:', isLogged);
   }, [path]);
-
+ 
   
-
-
+ 
+ 
   return (
     <>
     {isLogged &&
       <NavbarContainer>
         <NavbarMenu isOpen={headerOpen} style={{position:"relative"}}>
-              <div style={{display: 'flex', justifyContent: 'space-between', flexDirection: 'column', height: '100%'}}>
+              <div style={{display: 'flex', justifyContent: 'space-between', flexDirection: 'column', height: '100%', position:'relative'}}>
                 <div>
-                <ToggleButton 
-                    isOpen={headerOpen} 
+                <ToggleButton
+                    isOpen={headerOpen}
                     onClick={() => setHeaderOpen(!headerOpen)}
                 >
                     <FontAwesomeIcon icon={headerOpen ? faChevronLeft : faChevronRight} />
@@ -298,10 +304,10 @@ function Header2() {
                     {headerOpen ? (<Logo src={logo} alt="Logo" isOpen={headerOpen} />):(<Logo src={logoS} alt="Logo" isOpen={headerOpen} />)}
                           <StyledWrapper>
                               <label className="switch" aria-label="Toggle Passenger/Driver">
-                                  <input 
-                                      type="checkbox" 
-                                      checked={isDriver} 
-                                      onChange={confirmToggleDriverMode} 
+                                  <input
+                                      type="checkbox"
+                                      checked={isDriver}
+                                      onChange={confirmToggleDriverMode}
                                   />
                                   <span>
                                       <AiOutlineUser />
@@ -320,19 +326,26 @@ function Header2() {
                       <Icon icon={faHome} isDriver={isDriver} active={path === '/home'} />
                       </NavbarItem>
                       <NavbarItem onClick={() => history(isDriver ? '/created-trips' : '/reserved-trips')}>
-                      <Icon 
-                          icon={faMap} 
-                          isDriver={isDriver} 
+                      <Icon
+                          icon={faMap}
+                          isDriver={isDriver}
                           active={path === (isDriver ? '/created-trips' : '/reserved-trips')}
                       />
                       </NavbarItem>
                       <NavbarItem onClick={() =>history (isDriver ? '/trips-progress-driver' : '/trips-progress')}>
-                      <Icon 
-                                icon={faRoad} 
-                                isDriver={isDriver} 
+                      <Icon
+                                icon={faRoad}
+                                isDriver={isDriver}
                                 active={path === (isDriver ? '/trips-progress-driver' : '/trips-progress')}
                             />
                       </NavbarItem>
+                      <NavbarItem1 onClick={() =>history ('/pagina-principal')}>
+                      <Icon
+                                icon={faUser}
+                                isDriver={isDriver}
+                                active={path === ('/pagina-principal')}
+                            />
+                      </NavbarItem1>
                       </NavbarList>
                     </>
                     ):(
@@ -343,17 +356,17 @@ function Header2() {
                         <NavbarItemText active={headerOpen}>Inicio</NavbarItemText>
                       </NavbarItemComplete>
                       <NavbarItemComplete onClick={() => history(isDriver ? '/created-trips' : '/reserved-trips')}>
-                      <Icon 
-                          icon={faMap} 
-                          isDriver={isDriver} 
+                      <Icon
+                          icon={faMap}
+                          isDriver={isDriver}
                           active={path === (isDriver ? '/created-trips' : '/reserved-trips')}
                       />
                         <NavbarItemText active={headerOpen}>{isDriver ? 'Viajes Creados' : 'Viajes Reservados'}</NavbarItemText>
                       </NavbarItemComplete>
                       <NavbarItemComplete onClick={() => history('/trips-progress-driver')}>
-                      <Icon 
-                                icon={faRoad} 
-                                isDriver={isDriver} 
+                      <Icon
+                                icon={faRoad}
+                                isDriver={isDriver}
                                 active={path === (isDriver ? '/trips-progress-driver' : '/trips-progress')}
                                 
                             />                  
@@ -372,8 +385,23 @@ function Header2() {
                     </UserInfo>
                       }
                     </UserPhoto>
-                  </User>
+                  </User>            
               </div>
+              <StyledWrapper1>
+                    <label className="switch" aria-label="Toggle Passenger/Driver">
+                        <input
+                            type="checkbox"
+                            checked={isDriver}
+                            onChange={confirmToggleDriverMode}
+                        />
+                        <span>
+                            <AiOutlineUser />
+                        </span>
+                        <span>
+                            <AiOutlineCar />
+                        </span>
+                    </label>
+                </StyledWrapper1>
           </NavbarMenu>
           {showRegisterCarModal && (
                     <FeedbackModal
@@ -387,7 +415,7 @@ function Header2() {
                         }}
                     />
                 )}
-
+ 
                 {showToggleModeModal && (
                     <FeedbackModal
                         type="question"
@@ -406,5 +434,5 @@ function Header2() {
     </>
   )
 }
-
+ 
 export default Header2
