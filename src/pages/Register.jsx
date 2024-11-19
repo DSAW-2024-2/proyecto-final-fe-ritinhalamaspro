@@ -241,7 +241,7 @@ const Register = () => {
   // Asegúrate de liberar la URL creada cuando se cambie la imagen o el componente se desmonte
   useEffect(() => {
     return () => {
-      if (imagePreviewUrl !== "src/assets/ProfilePhoto.png") {
+      if (imagePreviewUrl !== "src/assets/PofilePhoto.png") {
         URL.revokeObjectURL(imagePreviewUrl);
       }
     };
