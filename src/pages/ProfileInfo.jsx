@@ -234,7 +234,7 @@ const ProfileInfo = () => {
         marginTop: '20px',
       }}>
         <div style={{ position: 'absolute', top: '-150px', left: '50%', transform: 'translateX(-50%)' }}>
-          <ProfilePhoto imageUrl={image ? image : 'src/assets/PofilePhoto.png'} size="120px" />
+          <ProfilePhoto imageUrl={image ? image : 'src/assets/profilephoto.png'} size="120px" />
         </div>
 
         {isPassenger && !isEditing && (

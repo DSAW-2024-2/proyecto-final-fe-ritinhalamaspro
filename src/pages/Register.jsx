@@ -33,7 +33,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true); // Estado para habilitar/deshabilitar el botón
   const [selectedImage, setSelectedImage] = useState(null); // Para la foto de perfil
-  const [imagePreviewUrl, setImagePreviewUrl] = useState("src/assets/PofilePhoto.png"); // Para la vista previa de la foto
+  const [imagePreviewUrl, setImagePreviewUrl] = useState("src/assets/profilephoto.png"); // Para la vista previa de la foto
   const [selectedRole, setSelectedRole] = useState("Conductor"); // Estado para manejar la selección del rol
   const navigate = useNavigate();
   const fileInputRef = useRef(null); // Referencia al input de tipo file
@@ -241,7 +241,7 @@ const Register = () => {
   // Asegúrate de liberar la URL creada cuando se cambie la imagen o el componente se desmonte
   useEffect(() => {
     return () => {
-      if (imagePreviewUrl !== "src/assets/PofilePhoto.png") {
+      if (imagePreviewUrl !== "src/assets/profilephoto.png") {
         URL.revokeObjectURL(imagePreviewUrl);
       }
     };
