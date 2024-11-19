@@ -330,22 +330,25 @@ const HomePage = () => {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-        
+    
                 if (!response.ok) throw new Error('Error al obtener los viajes creados');
-        
+    
                 const data = await response.json();
                 console.log("Viajes creados por el conductor:", data);
-        
-                // Procesar los datos del conductor si es necesario
-                const driverTrips = data.myTrips.map(trip => ({
-                    tripId: trip.tripId,
-                    sector: trip.sector,
-                    departureTime: trip.departureTime,
-                    date: trip.date,
-                    price: trip.price,
-                    pendingRequests: trip.pendingRequests || [],
-                }));
-        
+    
+                // Filtrar solo los viajes con state === 0
+                const driverTrips = data.myTrips
+                    .filter(trip => trip.state === 0) // Filtrar viajes con estado 0
+                    .reverse()
+                    .map(trip => ({
+                        tripId: trip.tripId,
+                        sector: trip.sector,
+                        departureTime: trip.departureTime,
+                        date: trip.date,
+                        price: trip.price,
+                        pendingRequests: trip.pendingRequests || [],
+                    }));
+    
                 setDriverTrips(driverTrips); // Usa un estado separado para los viajes del conductor
             } catch (error) {
                 console.error("Error al obtener los viajes creados por el conductor:", error);
@@ -353,9 +356,10 @@ const HomePage = () => {
                 setDriverLoading(false); // Usa un estado separado para el loading del conductor
             }
         };
-
+    
         fetchTripsDriver();
     }, []);
+    
 
     
 
@@ -428,7 +432,7 @@ useEffect(() => {
             const data = await response.json();
             console.log("Datos de viajes:", data);
             const newFilteredTrips = data.trips
-                    .filter(trip => trip.userId !== universityID && trip.state === 0)
+                    .filter(trip => trip.userId !== universityID && trip.state === 0 && trip.capacity > 0)
                     .reverse();
 
             // Extrae todos los sectores únicos
@@ -657,7 +661,7 @@ const applyFilters = () => {
                     <Text1>Hora de salida: {trip.departureTime || 'No especificada'}</Text1>
                 </TimeContainer>
                 <Text1>Precio/persona: ${trip.price || 'No especificado'}</Text1>
-                <Text1>Cupos Disponibles: {trip.capacity || 'No especificado'}</Text1>
+                <Text1>Cupos Disponibles: {trip.availability|| 'No especificado'}</Text1>
                 <StyledAddButton onClick={() => handleShowTripDetails(trip)}>+</StyledAddButton>
             </TripCard>
         ))
@@ -783,7 +787,7 @@ const applyFilters = () => {
     
                 {isDriver && (
                     <NotificationContainer>
-                    <Title>Notificaciones</Title>
+                    <Title>Viajes Pendientes</Title>
                     {driverTrips.length > 0 ? (
                         driverTrips.map((trip, index) => (
                             <NotificationCard key={index}>

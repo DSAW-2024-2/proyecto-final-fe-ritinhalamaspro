@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 
+
 const Container = styled.div`
     display: flex;
     width: 100%;
@@ -251,17 +252,24 @@ const CreatedTrips = () => {
                         'Authorization': `Bearer ${token}`,
                     },
                 });
-
+        
                 if (!response.ok) throw new Error('Error al obtener los viajes creados');
-
+        
                 const data = await response.json();
-                setTrips(data.myTrips || []);
+                
+                // Filtrar viajes con state === 0 y ordenarlos en orden inverso
+                const filteredTrips = data.myTrips
+                    .filter(trip => trip.state === 0)
+                    .reverse();
+        
+                setTrips(filteredTrips || []);
             } catch (error) {
                 console.error('Error al obtener los viajes creados:', error);
             } finally {
                 setLoading(false);
             }
         };
+        
 
         fetchTrips();
     }, []);
@@ -398,6 +406,7 @@ const CreatedTrips = () => {
         setShowDetailsModal(false);
         setShowDeleteModal(false);
         setSelectedTrip(null);
+        fetchTrips();
     };
 
     const getDetailAddress = async(lat, lng) => {

@@ -241,8 +241,10 @@ const TripsInProgress = () => {
                     });
     
                     if (!response.ok) throw new Error('Error al finalizar el viaje.');
-    
-                } catch (error) {
+                    setTrip(null);
+                } 
+                
+                catch (error) {
                     console.error('Error al finalizar el viaje:', error);
                     alert('Hubo un problema al finalizar el viaje. Intenta de nuevo.');
                 } finally {

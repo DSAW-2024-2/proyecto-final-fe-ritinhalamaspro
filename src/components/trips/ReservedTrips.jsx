@@ -276,7 +276,7 @@ const ReservedTrips = () => {
                                         <DeleteIcon onClick={(e) => { e.stopPropagation(); handleDeleteClick(trip); }}>
                                             <AiOutlineDelete />
                                         </DeleteIcon>
-                                        <Title> Cancels</Title>
+                                        <Title> Canceladas</Title>
  
                                         <TripInfo>
                                             <Text style={{ fontWeight: 'bold', fontSize: '16px' }}>{trip.route}</Text>
