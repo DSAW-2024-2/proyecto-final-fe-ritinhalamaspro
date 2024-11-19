@@ -257,7 +257,7 @@ const Register = () => {
     if (selectedRole === "Conductor") {
       navigate("/register-car");
     } else {
-      navigate("/pagina-principal");
+      navigate("/home");
     }
   };
 
@@ -454,7 +454,7 @@ const Register = () => {
 
         {steps === 3 && ( // Paso 3: Selección de rol
           <>
-            <Title>Selecciona tu rol</Title>
+            <Title>¿Quieres Registrar un Carro?</Title>
             <StyledWrapper>
               <div className="radio-buttons-container">
                 <div className="radio-button">
@@ -468,7 +468,7 @@ const Register = () => {
                   />
                   <label htmlFor="radio2" className="radio-button__label">
                     <span className="radio-button__custom" />
-                    Usuario
+                    No
                   </label>
                 </div>
 
@@ -484,7 +484,7 @@ const Register = () => {
                   />
                   <label htmlFor="radio1" className="radio-button__label">
                     <span className="radio-button__custom" />
-                    Conductor
+                    Si
                   </label>
                 </div>
               </div>

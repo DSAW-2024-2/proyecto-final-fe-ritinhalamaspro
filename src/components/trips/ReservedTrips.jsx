@@ -31,29 +31,39 @@ const TripsList = styled.div`
     overflow-y: auto;
     max-height: 100%;
 `;
- 
 const TripCard = styled.div`
-    background-color: ${colors.background};
-    border-radius: 15px;
-    padding: 15px;
-    color: ${colors.white};
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    position: relative;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-    width: 250px;
-    height: 180px;
-    min-width: 250px;
-    min-height: 180px;
+background-color: ${colors.background};
+border-radius: 15px;
+padding: 15px;
+color: ${colors.white};
+display: flex;
+flex-direction: column;
+gap: 10px;
+position: relative;
+box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+cursor: pointer;
+width: 250px;
+height: 180px;
+min-width: 250px;
+min-height: 180px;
 `;
- 
+
 const TripInfo = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+display: flex;
+flex-direction: column;
+gap: 5px;
 `;
+
+const DeleteIcon = styled.div`
+position: absolute;
+top: 10px;
+right: 10px;
+cursor: pointer;
+color: ${colors.white};
+font-size: 20px;
+`;
+
+
  
 const TripImage = styled.img`
     width: 80px;
@@ -62,14 +72,7 @@ const TripImage = styled.img`
     margin-top: auto;
 `;
  
-const DeleteIcon = styled.div`
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
-    color: ${colors.white};
-    font-size: 20px;
-`;
+
  
 const DetailsContainer = styled.div`
     flex: 0.4;
@@ -221,53 +224,35 @@ const ReservedTrips = () => {
                             </TabList>
  
                             <TabPanel>
-                            
                             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
                                 {pendingTrips.map((trip) => (
                                     <TripCard key={trip.id} onClick={() => handleTripClick(trip)}>
-                                        <DeleteIcon onClick={(e) => { e.stopPropagation(); handleDeleteClick(trip); }}>
+                                        <DeleteIcon
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteClick(trip);
+                                            }}
+                                        >
                                             <AiOutlineDelete />
                                         </DeleteIcon>
-                                        <Title> Pending</Title>
- 
+                                        
                                         <TripInfo>
+                                        <Title>{trip.sector}</Title>
                                             <Text style={{ fontWeight: 'bold', fontSize: '16px' }}>{trip.route}</Text>
-                                            <Text style={{ color: colors.details }}>Hora: {trip.time}</Text>
-                                            <Text style={{ color: colors.details }}>Precio /persona: <span style={{ color: colors.third }}>${trip.price}</span></Text>
+                                            <Text style={{ color: colors.details }}>Hora: {trip.departureTime}</Text>
+                                            <Text style={{ color: colors.details }}>
+                                                Precio /persona: <span style={{ color: colors.third }}>${trip.price}</span>
+                                            </Text>
                                         </TripInfo>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                                             <AiOutlineUser size={16} />
-                                            <Text>{trip.availablePlaces} Reservas</Text>
+                                            <Text>{trip.availability} Reservas</Text>
                                         </div>
-                                        <TripImage src={trip.image} alt="Car" />
                                     </TripCard>
                                 ))}
                             </div>
-                            </TabPanel>
- 
-                            <TabPanel>
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-                                {acceptedTrips.map((trip) => (
-                                    <TripCard key={trip.id} onClick={() => handleTripClick(trip)}>
-                                        <DeleteIcon onClick={(e) => { e.stopPropagation(); handleDeleteClick(trip); }}>
-                                            <AiOutlineDelete />
-                                        </DeleteIcon>
-                                        <Title>Accepted</Title>
- 
-                                        <TripInfo>
-                                            <Text style={{ fontWeight: 'bold', fontSize: '16px' }}>{trip.route}</Text>
-                                            <Text style={{ color: colors.details }}>Hora: {trip.time}</Text>
-                                            <Text style={{ color: colors.details }}>Precio /persona: <span style={{ color: colors.third }}>${trip.price}</span></Text>
-                                        </TripInfo>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                            <AiOutlineUser size={16} />
-                                            <Text>{trip.availablePlaces} Reservas</Text>
-                                        </div>
-                                        <TripImage src={trip.image} alt="Car" />
-                                    </TripCard>
-                                ))}
-                            </div>
-                            </TabPanel>
+                        </TabPanel>
+
  
                             <TabPanel>
                             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
