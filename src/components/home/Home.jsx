@@ -416,7 +416,7 @@ useEffect(() => {
     const fetchTrips = async (universityID) => {
         try {
             const token = localStorage.getItem('token');
-            const url = `${import.meta.env.VITE_API_URL}/trips/alls`;
+            const url = `${import.meta.env.VITE_API_URL}/trips/all`;
             const response = await fetch(url, {
                 headers: {
                     'Authorization': `Bearer ${token}`
