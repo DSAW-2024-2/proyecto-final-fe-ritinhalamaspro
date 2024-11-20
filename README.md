@@ -1,52 +1,45 @@
+# Proyecto Final DSAW
+
+Este repositorio contiene el proyecto final para la asignatura de Desarrollo de Software Avanzado en la Web (DSAW). La aplicación fue desarrollada con el objetivo de gestionar viajes, ofreciendo funcionalidades tanto para conductores como para pasajeros.
+
+## 🌐 Despliegue
+
+El proyecto está desplegado y disponible en el siguiente enlace:
+
+[**Acceder a la aplicación**](https://proyecto-final-fe-ritinhalamaspro.vercel.app/)
+
+## 📋 Gestión del Proyecto
+
+La planificación, organización y seguimiento de las tareas del proyecto se llevaron a cabo utilizando **Trello**. Puedes acceder al tablero de trabajo a través del siguiente enlace:
+
+[**Tablero Trello**](https://trello.com/b/AlNHsIse/proyecto-final-dsaw)
+
+## 🛠️ Tecnologías Utilizadas
+
+- **Frontend**: React con Vite
+- **Backend**: Node.js y Express (con Firebase como base de datos)
+- **Despliegue**: Vercel para el frontend y Firebase para las funciones del backend
+- **Estilos**: Styled Components y diseño responsivo
+- **Integraciones**: Google Maps API para rutas y paradas
+
+## 🚀 Funcionalidades Principales
+
+### 🚗 Para Conductores
+- Crear viajes definiendo puntos de origen, destino, y paradas intermedias.
+- Ver y gestionar solicitudes de reserva.
+- Cambiar el estado de los viajes (pendiente, en progreso, completado).
+
+### 🛵 Para Pasajeros
+- Buscar y reservar viajes disponibles.
+- Ver el estado de sus reservas (pendiente, aceptada o rechazada).
+- Identificar fácilmente su parada en los detalles del viaje.
+
+## 🎨 Diseño de Interfaz
+El diseño de la aplicación es intuitivo y adaptado a diferentes dispositivos, ofreciendo una experiencia de usuario fluida y atractiva.
+
+## 👩‍💻 Desarrolladores
+Este proyecto fue desarrollado por:
+- **Rita Trindade**
+- **Juan Gómez**
 
 
-# Deploy : https://proyecto-final-fe-ritinhalamaspro.vercel.app/pagina-principal
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
-
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
