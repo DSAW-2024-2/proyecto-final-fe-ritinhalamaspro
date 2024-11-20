@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import styled, { css } from 'styled-components';
 import { GoogleMap, Marker, DirectionsRenderer, Autocomplete, useLoadScript } from '@react-google-maps/api';
-import { Title, Input } from '../../components/common/CommonStyles';
+import { Title, Input, Text } from '../../components/common/CommonStyles';
 import colors from '../../assets/Colors';
 import Button from '../../components/common/Button';
 import FeedbackModal from '../../components/common/FeedbackModal';
@@ -74,6 +74,13 @@ const ButtonContainer = styled.div`
     gap: 10px;
     margin-top: 20px;
 `;
+
+const RowContainer = styled.div`
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+`;
+
 
 const CreateTrip = () => {
     const navigate = useNavigate();
@@ -190,8 +197,6 @@ const CreateTrip = () => {
                 };
 
  
-
-                
                 console.log("JSON enviado:", JSON.stringify(tripData));
                 console.log("Token enviado:", token);
                 const url = `${import.meta.env.VITE_API_URL}/trips/create/`;
@@ -252,6 +257,11 @@ const CreateTrip = () => {
                 </StyledMapContainer>
 
                 <Card>
+                <FormField>
+                    
+                    <Text>Sector de Inicio: {route}</Text>
+                   
+                </FormField>
                     <FormField>
                         <Autocomplete
                             onLoad={(autocomplete) => (window.originAutocomplete = autocomplete)}
@@ -285,28 +295,10 @@ const CreateTrip = () => {
                             />
                         </Autocomplete>
                         <MapIcon active={!selectingOrigin} onClick={() => setSelectingOrigin(false)} />
+
                     </FormField>
 
-                    <FormField>
-                        <Input as="select" value={passengerCount} onChange={(e) => setPassengerCount(e.target.value)}>
-                            <option value="">Cantidad de Pasajeros</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                        </Input>
-                    </FormField>
-                    <FormField>
-                        <Input value={route} placeholder="Ruta" readOnly />
-                    </FormField>
-                    <FormField>
-                        <Input
-                            type="number"
-                            placeholder="Precio por persona"
-                            value={price}
-                            onChange={handlePriceChange}
-                        />
-                    </FormField>
+
                     <FormField>
                         <Input
                             type="date"
@@ -321,9 +313,38 @@ const CreateTrip = () => {
                             type="time"
                             value={time}
                             onChange={(e) => setTime(e.target.value)}
-                            icon={<AiOutlineClockCircle color={colors.white} />}
+                            icon={<AiOutlineClockCircle  />}
                         />
                     </FormField>
+
+
+
+                    <RowContainer>
+                        <FormField style={{ flex: 1, minWidth: '0' }}>
+                            <Input
+                                as="select"
+                                value={passengerCount}
+                                onChange={(e) => setPassengerCount(e.target.value)}
+                            >
+                                <option value="">Cantidad de Pasajeros</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </Input>
+                        </FormField>
+                        <FormField style={{ flex: 1, minWidth: '0' }}>
+                            <Input
+                                type="number"
+                                placeholder="Precio por persona"
+                                value={price}
+                                onChange={handlePriceChange}
+                            />
+                        </FormField>
+                    </RowContainer>
+
+
+
                     <ButtonContainer>
                         <Button primary label="¡Listo!" onClick={handleCreateTrip} />
                     </ButtonContainer>

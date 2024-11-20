@@ -313,9 +313,7 @@ const TripsInProgress = () => {
                     <Text>
                         <strong>Precio por Persona:</strong> ${trip.price}
                     </Text>
-                    <Text>
-                        <strong>Cupos Disponibles:</strong> {trip.availability}
-                    </Text>
+
                     <Title>Paradas y Reservas</Title>
                     {trip.acceptedRequests?.length > 0 ? (
                         <StopsList>

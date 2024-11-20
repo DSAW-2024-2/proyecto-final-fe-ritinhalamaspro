@@ -23,6 +23,7 @@ const TripDetails = styled.div`
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     margin-bottom: 20px;
     max-width: 500px;
+    text-align: left; 
 `;
 
 const StopsList = styled.ul`
@@ -86,20 +87,28 @@ const TripsInProgress = () => {
         const fetchTrips = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const url = `${import.meta.env.VITE_API_URL}/trips/my-trips`;
+                const url = `${import.meta.env.VITE_API_URL}/trips/my-reservations`;
                 const response = await fetch(url, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-
+    
                 if (!response.ok) throw new Error('Error al obtener los viajes');
-
+    
                 const data = await response.json();
-                const inProgressTrip = data.myTrips.find((t) => t.state === 1);
+                console.log("Respuesta de la API:", data); // Verifica la estructura de la respuesta
+    
+                // Filtra el viaje con status "accept" y state === 1
+                const inProgressTrip = (data.reservedTrips || []).find(
+                    (trip) =>  trip.state === 1
+                );
+    
                 if (inProgressTrip) {
                     setTrip(inProgressTrip);
                     calculateRoute(inProgressTrip.startPoint, inProgressTrip.endPoint, inProgressTrip.acceptedRequests);
+                } else {
+                    setTrip(null); // No hay viajes en progreso
                 }
             } catch (error) {
                 console.error('Error al obtener el viaje en progreso:', error);
@@ -107,9 +116,10 @@ const TripsInProgress = () => {
                 setLoading(false);
             }
         };
-
+    
         fetchTrips();
     }, []);
+    
 
     const calculateRoute = async (start, end, acceptedRequests = []) => {
         try {
@@ -177,27 +187,30 @@ const TripsInProgress = () => {
 
     <TripDetails>
         <Title>Detalles del Viaje</Title>
-        <Text>
-            <strong>Sector:</strong> {trip.sector}
-        </Text>
+
         <Text>
             <strong>Hora de Salida:</strong> {trip.departureTime}
         </Text>
         <Text>
             <strong>Precio por Persona:</strong> ${trip.price}
         </Text>
-        <Text>
-            <strong>Cupos Disponibles:</strong> {trip.availability}
-        </Text>
+
         <Title>Paradas y Reservas</Title>
-        {trip.acceptedRequests?.length > 0 ? (
-            <StopsList>
-                {trip.acceptedRequests.map((reservation, index) => (
-                    <StopItem key={index}>
-                        <Text>Parada: {reservation.location || 'No especificada'}</Text>
-                    </StopItem>
-                ))}
-            </StopsList>
+                    {trip.acceptedRequests?.length > 0 ? (
+                        <StopsList>
+                            {trip.acceptedRequests.map((reservation, index) => {
+                                    const isUserStop = reservation.userId === localStorage.getItem('userId');
+                                    return (
+                                        <StopItem key={index}>
+                                            <Text>
+                                                Parada: {reservation.location || 'No especificada'}
+                                                {isUserStop && <span style={{ color: colors.third }}> (Tu parada)</span>}
+                                            </Text>
+                                        </StopItem>
+                                    );
+                                })}
+                           
+                        </StopsList>
         ) : (
             <Text>No hay reservas en este viaje.</Text>
         )}

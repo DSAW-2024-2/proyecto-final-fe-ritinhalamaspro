@@ -34,6 +34,23 @@ const TripsList = styled.div`
     overflow-y: auto;
     max-height: 100%;
 `;
+const Badge = styled.div`
+    position: absolute;
+    top: -17px;
+    right: 0px;
+    background-color: ${colors.third};
+    color: ${colors.white};
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    box-shadow: 0 0 5px ${colors.primary};
+`;
 
 const TripCard = styled.div`
     background-color: ${colors.background};
@@ -60,10 +77,10 @@ const TripInfo = styled.div`
 
 const DeleteIcon = styled.div`
     position: absolute;
-    top: 10px;
+    top: 20px;
     right: 10px;
     cursor: pointer;
-    color: ${colors.white};
+    color: ${colors.details};
     font-size: 20px;
 `;
 
@@ -92,9 +109,10 @@ const DetailsModal = styled.div`
 `;
 
 const StyledTabs = styled(Tabs)`
-
+ 
     .react-tabs__tab-list {
         display: flex;
+        width: 90vw;
     }
     .react-tabs__tab {
         font-size: 1.2em;
@@ -107,7 +125,7 @@ const StyledTabs = styled(Tabs)`
         border: none;
         transition: all 0.3s ease;
     }
-
+ 
     .react-tabs__tab:hover {
         color:${colors.primaryHover};;
     }
@@ -117,13 +135,14 @@ const StyledTabs = styled(Tabs)`
     }
     .react-tabs__tab-panel {
         display: flex;
-        height: 100%;
         flex-direction: column;
+        margin-top: 5em;
         align-items: center;
         justify-content: center;
         gap: 1em;
     }
 `;
+
 
 const ButtonContainer = styled.div`
     display: flex;
@@ -210,6 +229,8 @@ const CreatedTrips = () => {
         }
     }, [selectedTrip, recalculate]);
 
+   
+
     const triggerReRender = () => {
         setForceRender((prev) => prev + 1); // Cambiar el estado forzará el re-render
     };
@@ -272,7 +293,7 @@ const CreatedTrips = () => {
         
 
         fetchTrips();
-    }, []);
+    }, [pendingRequest]);
 
     const handleTripClick = async (trip) => {
         console.log(trip);
@@ -495,9 +516,29 @@ const CreatedTrips = () => {
             optimizeWaypoints: true,
             travelMode: google.maps.TravelMode.DRIVING,
         });
+    
         setDirections(results);
-        setDistance(results.routes[0].legs[0].distance.text);
-        setDuration(results.routes[0].legs[0].duration.text);
+    
+        // Initialize total distance and duration
+        let totalDistance = 0;
+        let totalDuration = 0;
+    
+        // Iterate over each leg of the route
+        for (const leg of results.routes[0].legs) {
+            totalDistance += leg.distance.value;
+            totalDuration += leg.duration.value;
+        }
+    
+        // Format the total distance and duration
+        const formattedTotalDistance = google.maps.geometry.spherical.computeDistanceBetween(
+            new google.maps.LatLng(results.routes[0].legs[0].start_location.lat(), results.routes[0].legs[0].start_location.lng()),
+            new google.maps.LatLng(results.routes[0].legs[0].end_location.lat(), results.routes[0].legs[0].end_location.lng())
+        ).toFixed(2);
+        const formattedTotalDuration = new Date(totalDuration * 1000).toISOString().substr(11, 8);
+ 
+        const distanceKm = parseFloat(formattedTotalDistance) / 1000;
+        setDistance(distanceKm.toFixed(2) + ' km');
+        setDuration(formattedTotalDuration);
         console.log('Ruta calculada:', results);
     }
 
@@ -544,6 +585,7 @@ const CreatedTrips = () => {
             }
     
             console.log(`Solicitud ${action} correctamente para el usuario ${userId}`);
+            setShowDetailsModal(false);
         } catch (error) {
             console.error(`Error al ${action} la solicitud:`, error);
         }
@@ -563,6 +605,10 @@ const CreatedTrips = () => {
                     {trips.length > 0 ? (
                         trips.map((trip) => (
                             <TripCard key={trip.tripId} onClick={() => handleTripClick(trip)}>
+                                {/* Muestra el badge si hay solicitudes pendientes */}
+                                {trip.pendingRequests?.length > 0 && (
+                                    <Badge>{trip.pendingRequests.length}</Badge>
+                                )}
                                 <DeleteIcon
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -573,6 +619,8 @@ const CreatedTrips = () => {
                                 </DeleteIcon>
                                 <TripInfo>
                                     <Text1 style={{ fontWeight: 'bold', fontSize: '16px' }}>{trip.sector}</Text1>
+                                    
+                                    <Text1 style={{ color: colors.details }}>Fecha: {trip.date}</Text1>
                                     <Text1 style={{ color: colors.details }}>Hora: {trip.departureTime}</Text1>
                                     <Text1 style={{ color: colors.details }}>
                                         Precio /persona: <span style={{ color: colors.third }}>${trip.price}</span>

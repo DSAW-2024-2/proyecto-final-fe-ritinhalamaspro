@@ -101,12 +101,12 @@ const DriverContainer = styled.div`
 `;
 
 const CreateTripCard = styled.div`
-    background-color: ${colors.primaryHover};
+    background-color: ${colors.background};
     border-radius: 10px;
     padding: 20px;
     width: 250px;
     color: ${colors.white};
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -116,14 +116,14 @@ const CreateTripCard = styled.div`
 `;
 
 const NotificationContainer = styled.div`
-    background-color: ${colors.primaryHover};
+    background-color: ${colors.background};
     border-radius: 10px;
     padding: 20px;
     color: ${colors.white};
-    width: 250px;
+    width: 550px;
     max-height: 400px;
     overflow-y: auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 -1px 10px rgba(118, 29, 166, 0.8);
 `;
 
 const NotificationCard = styled.div`
