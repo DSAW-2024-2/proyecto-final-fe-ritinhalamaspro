@@ -1,7 +1,7 @@
 // src/pages/HomePage/HomePage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AiOutlineClockCircle, AiOutlineCloseCircle, AiOutlineCheckCircle, AiOutlineSearch   } from 'react-icons/ai';
+import { AiOutlineClockCircle, AiOutlineCloseCircle, AiOutlineCheckCircle, AiOutlineSearch, AiOutlineUser, AiOutlineDollarCircle   } from 'react-icons/ai';
 import styled from 'styled-components';
 import { Container, Text, Input, StyledAddButton, Text1 } from '../../components/common/CommonStyles';
 import colors from '../../assets/Colors';
@@ -655,18 +655,31 @@ const applyFilters = () => {
                     />
                 )}
                 <Title>{trip.sector}</Title> 
+                <Text1 >
+                    Conductor: {`${trip.name || ''} ${trip.surName || ''}`}
+                </Text1>
+                
+<Text1 style={{ color: colors.details }}>
+    De: {startAddresses[index] || 'Dirección no encontrada'}
+</Text1>
+<Text1 style={{ color: colors.details }}>
+    A: {endAddresses[index] || 'Dirección no encontrada'}
+</Text1>
+<TimeContainer>
+    <Text1 style={{ color: colors.details }}>
+        <AiOutlineClockCircle style={{ marginRight: '5px' }} />
+        {trip.departureTime || 'No especificada'}
+    </Text1>
+</TimeContainer>
+<Text1 style={{ color: colors.details }}>
+    <AiOutlineDollarCircle style={{ marginRight: '5px' }} />
+    ${trip.price || 'No especificado'}
+</Text1>
+<Text1 style={{ color: colors.details }}>
+    <AiOutlineUser style={{ marginRight: '5px' }} />
+    {trip.availability || 'No especificado'}
+</Text1>
 
-                <Text1>
-                    De: {startAddresses[index] || 'Dirección no encontrada'}
-                </Text1>
-                <Text1>
-                    A: {endAddresses[index] || 'Dirección no encontrada'}
-                </Text1>
-                <TimeContainer>
-                    <Text1>Hora de salida: {trip.departureTime || 'No especificada'}</Text1>
-                </TimeContainer>
-                <Text1>Precio/persona: ${trip.price || 'No especificado'}</Text1>
-                <Text1>Cupos Disponibles: {trip.availability|| 'No especificado'}</Text1>
                 <StyledAddButton onClick={() => handleShowTripDetails(trip)}>+</StyledAddButton>
             </TripCard>
         ))

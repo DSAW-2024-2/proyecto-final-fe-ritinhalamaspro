@@ -277,7 +277,7 @@ const ReservedTrips = () => {
                             <TabPanel>
                             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px', marginTop: '40px' }}>
                                 {pendingTrips.map((trip) => (
-                                    <TripCard key={trip.id} onClick={() => handleTripClick(trip)}>
+                                    <TripCard key={trip.id}>
                                         <DeleteIcon
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -314,7 +314,7 @@ const ReservedTrips = () => {
                         <TabPanel>
                             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px', marginTop: '40px' }}>
                                 {acceptedTrips.map((trip) => (
-                                    <TripCard key={trip.id} onClick={() => handleTripClick(trip)}>
+                                    <TripCard key={trip.id}>
                                         <DeleteIcon
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -348,7 +348,7 @@ const ReservedTrips = () => {
                         <TabPanel>
                             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px', marginTop: '40px' }}>
                                 {rejectedTrips.map((trip) => (
-                                    <TripCard key={trip.id} onClick={() => handleTripClick(trip)}>
+                                    <TripCard key={trip.id} >
                                         <DeleteIcon
                                             onClick={(e) => {
                                                 e.stopPropagation();
