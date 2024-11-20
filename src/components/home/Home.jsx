@@ -15,6 +15,7 @@ import { useGoogleMaps } from '../common/GoogleMapsProvider';
 import { GoogleMap, Marker, DirectionsRenderer, Autocomplete, useLoadScript } from '@react-google-maps/api';
 
 
+
 // Estilos personalizados
 const MainContainer = styled(Container)`
     align-items: flex-start;
@@ -120,10 +121,10 @@ const NotificationContainer = styled.div`
     border-radius: 10px;
     padding: 20px;
     color: ${colors.white};
-    width: 550px;
+    width: 350px;
     max-height: 400px;
     overflow-y: auto;
-    box-shadow: 0 -1px 10px rgba(118, 29, 166, 0.8);
+    box-shadow: 0 -1px 10px ${colors.primary};
 `;
 
 const NotificationCard = styled.div`
@@ -226,6 +227,9 @@ const HomePage = () => {
     const [endPoint, setEndPoint] = useState(null);
     const { services, isLoaded, loadError } = useGoogleMaps();
 
+    const [reload, setReload] = useState(false);
+ 
+
 
     const [driverTrips, setDriverTrips] = useState([]); // Almacena los viajes del conductor
     const [driverLoading, setDriverLoading] = useState(true); // Estado de carga para los viajes del conductor
@@ -268,7 +272,7 @@ const HomePage = () => {
 
 
 
-    const handleRequestAction = async (userId, action) => {
+    const handleRequestAction = async (userId, action, tripId) => {
         try {
             const token = localStorage.getItem('token');
             if (!userId) {
@@ -283,7 +287,7 @@ const HomePage = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    tripId: selectedTrip?.tripId,
+                    tripId,
                     userId,
                     action,
                 }),
@@ -305,6 +309,7 @@ const HomePage = () => {
                     : trip
             );
             setDriverTrips(updatedTrips);
+            setReload(!reload)
         } catch (error) {
             console.error(`Error al ${action} la solicitud:`, error);
         }
@@ -358,7 +363,7 @@ const HomePage = () => {
         };
     
         fetchTripsDriver();
-    }, []);
+    }, [reload]);
     
 
     
@@ -804,10 +809,10 @@ const applyFilters = () => {
                                         <LocationCard key={idx}>
                                             <Text1>{request.location || 'Ubicación no especificada'}</Text1>
                                             <ButtonContainer>
-                                                <ActionButton onClick={() => handleRequestAction(request.userId, 'accept')}>
+                                                <ActionButton onClick={() => handleRequestAction(request.userId, 'accept',trip.tripId)}>
                                                     <AiOutlineCheckCircle size={20} />
                                                 </ActionButton>
-                                                <ActionButton onClick={() => handleRequestAction(request.userId, 'reject')}>
+                                                <ActionButton onClick={() => handleRequestAction(request.userId, 'reject',trip.tripId)}>
                                                     <AiOutlineCloseCircle size={20} />
                                                 </ActionButton>
                                             </ButtonContainer>

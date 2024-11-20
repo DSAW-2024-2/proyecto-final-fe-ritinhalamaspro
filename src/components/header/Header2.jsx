@@ -325,6 +325,7 @@ function Header2() {
                       <NavbarItem onClick={() => history('/home')}>
                       <Icon icon={faHome} isDriver={isDriver} active={path === '/home'} />
                       </NavbarItem>
+                      
                       <NavbarItem onClick={() => history(isDriver ? '/created-trips' : '/reserved-trips')}>
                       <Icon
                           icon={faMap}

@@ -38,7 +38,7 @@ const Badge = styled.div`
     position: absolute;
     top: -17px;
     right: 0px;
-    background-color: ${colors.third};
+    background-color: ${colors.primary};
     color: ${colors.white};
     font-size: 14px;
     font-weight: bold;
@@ -112,7 +112,6 @@ const StyledTabs = styled(Tabs)`
  
     .react-tabs__tab-list {
         display: flex;
-        width: 90vw;
     }
     .react-tabs__tab {
         font-size: 1.2em;
@@ -135,8 +134,8 @@ const StyledTabs = styled(Tabs)`
     }
     .react-tabs__tab-panel {
         display: flex;
+        height: 100%;
         flex-direction: column;
-        margin-top: 5em;
         align-items: center;
         justify-content: center;
         gap: 1em;

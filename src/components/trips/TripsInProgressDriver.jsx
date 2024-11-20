@@ -14,17 +14,18 @@ const TripDetailsContainer = styled.div`
     flex-direction: row;
     gap: 20px;
     justify-content: center;
-    width: 90%;
+    width: 100%;
 `;
 
 const TripDetails = styled.div`
-    flex: 1;
-    background-color: ${colors.primaryHover};
-    padding: 20px;
+     background-color: ${colors.background};
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    margin-bottom: 20px;
-    max-width: 500px;
+    padding: 20px;
+    color: ${colors.white};
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 -1px 10px ${colors.primary};
 `;
 
 const StopsList = styled.ul`
@@ -319,7 +320,7 @@ const TripsInProgress = () => {
                         <StopsList>
                             {trip.acceptedRequests.map((reservation, index) => (
                                 <StopItem key={index}>
-                                    <Text>Parada: {reservation.location || 'No especificada'}</Text> 
+                                    <Text>{reservation.location || 'No especificada'}</Text> 
                                 </StopItem>
                             ))}
                         </StopsList>

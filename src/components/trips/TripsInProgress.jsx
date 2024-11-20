@@ -7,6 +7,9 @@ import { Container, Text, Title } from '../common/CommonStyles';
 import Button from '../common/Button';
 import { useGoogleMaps } from '../common/GoogleMapsProvider';
 
+import { useSelector } from 'react-redux';
+import { selectUser } from '../../features/users/UserSlice';
+
 const TripDetailsContainer = styled.div`
     display: flex;
     flex-direction: row;
@@ -16,14 +19,14 @@ const TripDetailsContainer = styled.div`
 `;
 
 const TripDetails = styled.div`
-    flex: 1;
-    background-color: ${colors.primaryHover};
-    padding: 20px;
+    background-color: ${colors.background};
     border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    margin-bottom: 20px;
-    max-width: 500px;
-    text-align: left; 
+    padding: 20px;
+    color: ${colors.white};
+    width: 500px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 -1px 10px rgba(118, 29, 166, 0.8);
 `;
 
 const StopsList = styled.ul`
@@ -51,6 +54,16 @@ const TripsInProgress = () => {
     const [showMap, setShowMap] = useState(false);
     const [recalculate, setRecalculate] = useState(false);
     const { services, isLoaded, loadError } = useGoogleMaps();
+    const userId = useSelector(selectUser);
+    const [stop, setStop] = useState(null);
+
+    const [loggedUserId, setLoggedUserId] = useState(null);
+
+    useEffect(() => {
+        const userId = localStorage.getItem('userId');
+        setLoggedUserId(userId);
+    }, []);
+
 
 
     useEffect(() => {
@@ -107,6 +120,10 @@ const TripsInProgress = () => {
                 if (inProgressTrip) {
                     setTrip(inProgressTrip);
                     calculateRoute(inProgressTrip.startPoint, inProgressTrip.endPoint, inProgressTrip.acceptedRequests);
+                    setTimeout(() => {
+                        setStop(inProgressTrip.acceptedRequests.find((request) => request.userId === userId));
+                        console.log('Stop:', stop);
+                    }, 1000);
                 } else {
                     setTrip(null); // No hay viajes en progreso
                 }
@@ -195,22 +212,19 @@ const TripsInProgress = () => {
             <strong>Precio por Persona:</strong> ${trip.price}
         </Text>
 
-        <Title>Paradas y Reservas</Title>
+        <Title>Tu Parada:</Title>
                     {trip.acceptedRequests?.length > 0 ? (
                         <StopsList>
-                            {trip.acceptedRequests.map((reservation, index) => {
-                                    const isUserStop = reservation.userId === localStorage.getItem('userId');
-                                    return (
-                                        <StopItem key={index}>
-                                            <Text>
-                                                Parada: {reservation.location || 'No especificada'}
-                                                {isUserStop && <span style={{ color: colors.third }}> (Tu parada)</span>}
-                                            </Text>
-                                        </StopItem>
-                                    );
-                                })}
-                           
-                        </StopsList>
+                        {stop && (
+                            <StopItem>
+                                <Text>{stop.location}</Text>
+                            </StopItem>
+                        )
+
+                        }
+                    </StopsList>
+                    
+                    
         ) : (
             <Text>No hay reservas en este viaje.</Text>
         )}

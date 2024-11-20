@@ -46,10 +46,10 @@ const TripCard = styled.div`
     height: auto; /* Cambiado de fijo a automático */
     min-width: 250px;
     overflow: hidden; /* Asegura que nada se salga del contenedor */
-    max-height: 300px; /* Opcional: limita el tamaño máximo de la tarjeta */
+    max-height: 400px; /* Opcional: limita el tamaño máximo de la tarjeta */
 `;
-
-
+ 
+ 
 const TripInfo = styled.div`
     display: flex;
     flex-direction: column;
@@ -58,8 +58,8 @@ const TripInfo = styled.div`
     text-overflow: ellipsis; /* Corta el texto si es muy largo */
     white-space: nowrap; /* Mantiene el texto en una sola línea */
 `;
-
-
+ 
+ 
 const DeleteIcon = styled.div`
     position: absolute;
     top: 10px;
@@ -68,20 +68,30 @@ const DeleteIcon = styled.div`
     color: ${colors.white};
     font-size: 20px;
     `;
-
-
  
-const TripImage = styled.img`
-    width: 80px;
-    height: 50px;
-    border-radius: 8px;
-    align-self: flex-end;
-    margin-top: auto;
+ 
+ 
+const TripImageContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    border-radius: 15px;
+    position: cover;
+    
 `;
 
 
+const TripImage = styled.img`
+    width: 100%;
+    height: 6em;
+    border-radius: 1em;
+    object-fit: cover;
+`;
  
-
+ 
+ 
+ 
  
 const DetailsContainer = styled.div`
     flex: 0.4;
@@ -148,12 +158,11 @@ const StyledTabs = styled(Tabs)`
     }
     .react-tabs__tab--selected {
         color: #ffffff;
-        background: ${colors.primary};
+        background: ${colors.third};
     }
     .react-tabs__tab-panel {
         display: flex;
         flex-direction: column;
-        margin-top: 5em;
         align-items: center;
         justify-content: center;
         gap: 1em;
@@ -168,7 +177,7 @@ const ReservedTrips = () => {
     const [pendingTrips, setPendingTrips] = useState(null);
     const [acceptedTrips, setAcceptedTrips] = useState(null);
     const [rejectedTrips, setRejectedTrips] = useState(null);
-
+ 
     const [reload, setReload] = useState(false);
  
  
@@ -186,6 +195,7 @@ const ReservedTrips = () => {
                 if (!response.ok) throw new Error("Error al obtener los viajes reservados");
  
                 const data = await response.json();
+                console.log("Viajes reservados:", data.reservedTrips);
                 setTrips(data.reservedTrips || []); // Actualiza el estado con los datos obtenidos
                 const pending = data.reservedTrips.filter((trip) => trip.status === 'pending');
                 const accepted = data.reservedTrips.filter((trip) => trip.status === 'accepted');
@@ -220,8 +230,8 @@ const ReservedTrips = () => {
         setShowModal(false);
         setTripToDelete(null);
     };
-
-
+ 
+ 
     const deleteReservation = async (tripId) => {
         try {
             const token = localStorage.getItem('token');
@@ -248,7 +258,7 @@ const ReservedTrips = () => {
             console.error("Error al cancelar la reserva:", error);
         }
     };
-
+ 
  
     return (
         <Container>
@@ -265,7 +275,7 @@ const ReservedTrips = () => {
                             </TabList>
  
                             <TabPanel>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px', marginTop: '40px' }}>
                                 {pendingTrips.map((trip) => (
                                     <TripCard key={trip.id} onClick={() => handleTripClick(trip)}>
                                         <DeleteIcon
@@ -287,10 +297,12 @@ const ReservedTrips = () => {
                                         </TripInfo>
                                         {/* Agregar la imagen del carro */}
                                         {trip.carPhoto&& (
+                                            <TripImageContainer>
                                             <TripImage
                                                 src={trip.carPhoto}
                                                 alt="Car"
                                             />
+                                            </TripImageContainer>
                                         )}
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                                         </div>
@@ -298,9 +310,9 @@ const ReservedTrips = () => {
                                 ))}
                             </div>
                         </TabPanel>
-
+ 
                         <TabPanel>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px', marginTop: '40px' }}>
                                 {acceptedTrips.map((trip) => (
                                     <TripCard key={trip.id} onClick={() => handleTripClick(trip)}>
                                         <DeleteIcon
@@ -313,7 +325,7 @@ const ReservedTrips = () => {
                                         </DeleteIcon>
                                         <TripInfo>
                                             <Title>{trip.sector}</Title>
-                                            <Text1 style={{ fontWeight: 'bold', fontSize: '16px' }}>{trip.route}</Text1>
+                                            <Text1 style={{ fontWeight: 'bold', fontSize: '16px' }}>{trip.date}</Text1>
                                             <Text1 style={{ color: colors.details }}>Hora: {trip.departureTime}</Text1>
                                             <Text1 style={{ color: colors.details }}>
                                                 Precio /persona: <span style={{ color: colors.third }}>${trip.price}</span>
@@ -332,9 +344,9 @@ const ReservedTrips = () => {
                                 ))}
                             </div>
                         </TabPanel>
-
+ 
                         <TabPanel>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px', marginTop: '40px' }}>
                                 {rejectedTrips.map((trip) => (
                                     <TripCard key={trip.id} onClick={() => handleTripClick(trip)}>
                                         <DeleteIcon
@@ -347,7 +359,7 @@ const ReservedTrips = () => {
                                         </DeleteIcon>
                                         <TripInfo>
                                             <Title>{trip.sector}</Title>
-                                            <Text1 style={{ fontWeight: 'bold', fontSize: '16px' }}>{trip.route}</Text1>
+                                            <Text1 style={{ fontWeight: 'bold', fontSize: '16px' }}>{trip.date}</Text1>
                                             <Text1 style={{ color: colors.details }}>Hora: {trip.departureTime}</Text1>
                                             <Text1 style={{ color: colors.details }}>
                                                 Precio /persona: <span style={{ color: colors.third }}>${trip.price}</span>
@@ -366,7 +378,7 @@ const ReservedTrips = () => {
                                 ))}
                             </div>
                         </TabPanel>
-
+ 
  
  
  

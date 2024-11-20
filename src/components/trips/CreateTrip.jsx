@@ -7,7 +7,7 @@ import colors from '../../assets/Colors';
 import Button from '../../components/common/Button';
 import FeedbackModal from '../../components/common/FeedbackModal';
 import { useNavigate } from 'react-router-dom';
-import { AiOutlineClockCircle, AiOutlineCalendar, AiOutlineAim } from 'react-icons/ai';
+import { AiOutlineClockCircle, AiOutlineCalendar, AiOutlineAim,AiOutlineDollar,AiOutlineUser } from 'react-icons/ai';
 import { useGoogleMaps } from '../common/GoogleMapsProvider';
 
 
@@ -77,8 +77,9 @@ const ButtonContainer = styled.div`
 
 const RowContainer = styled.div`
     display: flex;
-    width: 100%;
+    width: 50%;
     justify-content: space-between;
+
 `;
 
 
@@ -318,30 +319,42 @@ const CreateTrip = () => {
                     </FormField>
 
 
-
                     <RowContainer>
-                        <FormField style={{ flex: 1, minWidth: '0' }}>
-                            <Input
-                                as="select"
-                                value={passengerCount}
-                                onChange={(e) => setPassengerCount(e.target.value)}
-                            >
-                                <option value="">Cantidad de Pasajeros</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                            </Input>
-                        </FormField>
-                        <FormField style={{ flex: 1, minWidth: '0' }}>
-                            <Input
-                                type="number"
-                                placeholder="Precio por persona"
-                                value={price}
-                                onChange={handlePriceChange}
-                            />
-                        </FormField>
-                    </RowContainer>
+                    <FormField style={{ flex: 1, minWidth: '0', position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <AiOutlineUser style={{ position: 'absolute', left: '10px', color: colors.white, fontSize: '20px' }} />
+                        <Input
+                            as="select"
+                            value={passengerCount}
+                            onChange={(e) => setPassengerCount(e.target.value)}
+                            style={{
+                                paddingLeft: '40px', // Espacio para el ícono
+                                background: 'transparent',
+                                outline: 'none',
+                            }}
+                        >
+                            <option value=""></option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </Input>
+                    </FormField>
+                    <FormField style={{ flex: 1, minWidth: '0', position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <AiOutlineDollar style={{ position: 'absolute', left: '10px', color: colors.white, fontSize: '20px' }} />
+                        <Input
+                            type="number"
+                            placeholder=""
+                            value={price}
+                            onChange={handlePriceChange}
+                            style={{
+                                paddingLeft: '40px', // Espacio para el ícono
+                                background: 'transparent',
+                                outline: 'none',
+                            }}
+                        />
+                    </FormField>
+                </RowContainer>
+
 
 
 
